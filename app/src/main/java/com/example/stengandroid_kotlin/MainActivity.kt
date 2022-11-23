@@ -1,121 +1,57 @@
 package com.example.stengandroid_kotlin
 
-import android.content.Context
-import android.hardware.SensorManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.AttributeSet
-import android.view.View
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
-import java.util.*
+import androidx.activity.compose.setContent
 
 class MainActivity : AppCompatActivity() {
 
-    lateinit var binding: ActivityMainBinding
-    lateinit var dataHelper: DataHelper
-    lateinit var sensorManager: SensorManager
+    lateinit var startButton : Button
+    lateinit var endButton : Button
 
-    private val timer = Timer()
+    //lateinit var timeStamp : TextView
+    lateinit var latData : TextView
+    lateinit var longData : TextView
+    lateinit var altData : TextView
+    lateinit var snrData : TextView
+    lateinit var cellID : TextView
+    lateinit var ueID : TextView
 
-    override fun onCreate(savedInstanceState: Bundle?)
-    {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-        dataHelper = DataHelper(applicationContext)
+        setContentView(R.layout.activity_main)
 
-        binding.startButton.setOnClickListener{ startStopAction() }
-        binding.resetButton.setOnClickListener{ resetAction() }
+        //timeStamp code
 
-        if(dataHelper.timerCounting())
-        {
-            startTimer()
+        //
+        latData = findViewById(R.id.textView_Latitude_Data)
+        longData = findViewById(R.id.textView_Longitude_Data)
+        altData = findViewById(R.id.textView_Altitude_Data)
+        snrData = findViewById(R.id.textView_SNR_Data)
+        cellID = findViewById(R.id.textView_CELLID_Data)
+        ueID = findViewById(R.id.textView_UEID_Data)
+        startButton = findViewById(R.id.Button_Start)
+        endButton = findViewById(R.id.Button_End)
+
+        startButton.setOnClickListener {
+            /*
+            basically below code is will be changed to the corresponding data, i.e. once latData is pulled, change latData to 100,028.812398
+            or however it's supposed to look like
+            */
+            latData.text = "latData is pulled"
+            longData.text = "longData is pulled"
+            altData.text = "altData is pulled"
+            snrData.text = "snrData is pulled"
+            cellID.text = "hardcoded cell ID"
+            ueID.text = "hardcoded UEID"
+            Toast.makeText(this, "to test whether Start Button works", Toast.LENGTH_SHORT).show()
         }
-        else
-        {
-            stopTimer()
-            if(dataHelper.startTime() != null && dataHelper.stopTime() != null)
-            {
-                val time = Date().time - calcRestartTime().time
-                binding.timeTV.text = timeStringFromLong(time)
-            }
-        }
 
-        timer.scheduleAtFixedRate(TimeTask(), 0, 500)
-    }
-
-    private inner class TimeTask: TimerTask()
-    {
-        override fun run()
-        {
-            if(dataHelper.timerCounting())
-            {
-                val time = Date().time - dataHelper.startTime()!!.time
-                binding.timeTV.text = timeStringFromLong(time)
-            }
+        endButton.setOnClickListener {
+            Toast.makeText(this, "to test whether END button works", Toast.LENGTH_SHORT).show()
         }
     }
-
-    private fun resetAction()
-    {
-        dataHelper.setStopTime(null)
-        dataHelper.setStartTime(null)
-        stopTimer()
-        binding.timeTV.text = timeStringFromLong(0)
-    }
-
-    private fun stopTimer()
-    {
-        dataHelper.setTimerCounting(false)
-        binding.startButton.text = getString(R.string.start)
-    }
-
-    private fun startTimer()
-    {
-        dataHelper.setTimerCounting(true)
-        binding.startButton.text = getString(R.string.end)
-    }
-
-    private fun startStopAction()
-    {
-        if(dataHelper.timerCounting())
-        {
-            dataHelper.setStopTime(Date())
-            stopTimer()
-        }
-        else
-        {
-            if(dataHelper.stopTime() != null)
-            {
-                dataHelper.setStartTime(calcRestartTime())
-                dataHelper.setStopTime(null)
-            }
-            else
-            {
-                dataHelper.setStartTime(Date())
-            }
-            startTimer()
-        }
-    }
-
-    private fun calcRestartTime(): Date
-    {
-        val diff = dataHelper.startTime()!!.time - dataHelper.stopTime()!!.time
-        return Date(System.currentTimeMillis() + diff)
-    }
-
-    private fun timeStringFromLong(ms: Long): String
-    {
-        val seconds = (ms / 1000) % 60
-        val minutes = (ms / (1000 * 60) % 60)
-        val hours = (ms / (1000 * 60 * 60) % 24)
-        return makeTimeString(hours, minutes, seconds)
-    }
-
-    private fun makeTimeString(hours: Long, minutes: Long, seconds: Long): String
-    {
-        return String.format("%02d:%02d:%02d", hours, minutes, seconds)
-    }
-
 }
