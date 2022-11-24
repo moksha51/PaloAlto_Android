@@ -29,7 +29,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var startButton : Button
     private lateinit var stopButton : Button
 
-
     private lateinit var timeStampData : TextView
     private lateinit var latData : TextView
     private lateinit var longData : TextView
@@ -51,6 +50,7 @@ class MainActivity : AppCompatActivity() {
 
         locationClient = DefaultLocationClient(applicationContext, LocationServices.getFusedLocationProviderClient(applicationContext))
 
+        timeStampData = findViewById(R.id.textView_timeStamp)
         latData = findViewById(R.id.textView_Latitude)
         longData = findViewById(R.id.textView_Longitude)
         altData = findViewById(R.id.textView_Altitude)
@@ -170,7 +170,7 @@ class MainActivity : AppCompatActivity() {
 
                         // on below line we are setting
                         // our string to our text view.
-                        timeStamp.text = timeStampResp
+                        timeStampData.text = timeStampResp
                         latData.text = latDataResp
                         longData.text = longDataResp
                         altData.text = altDataResp
