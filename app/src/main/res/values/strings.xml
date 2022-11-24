@@ -1,11 +1,26 @@
 <resources>
-    <string name="app_name">STENGANDROID_KOTLIN</string>
+    <string name="app_name">Palo Alto</string>
     <string name="place_holder_time">00:00:00</string>
     <string name="reset">Reset</string>
     <string name="pause">Pause</string>
     <string name="start">Start</string>
-    <string name="end">End</string>
-    <string name="longitude_data"> </string>
-    <string name="latitude_data"></string>
+    <string name="stop">Stop</string>
+    <string name="live">Live</string>
+
+    <string name="latitudeNA">Latitude:NA</string>
+    <string name="longitudeNA">Longitude:NA</string>
+    <string name="altitudeNA">Altitude:NA</string>
+    <string name="snrNA">SNR:NA</string>
+    <string name="UEIDNA">UEID:NA</string>
+    <string name="CELLIDNA">CELLID:NA</string>
+    <string name="accuracyNA">Accuracy:NA</string>
+
+    <string name="longitude">Longitude: </string>
+    <string name="latitude">Latitude: </string>
+    <string name="altitude">Altitude: </string>
+    <string name="snr">SNR: </string>
+    <string name="UEID">UEID: </string>
+    <string name="CELLID">CELLID: </string>
+    <string name="accuracy">Accuracy: </string>
 
 </resources>
