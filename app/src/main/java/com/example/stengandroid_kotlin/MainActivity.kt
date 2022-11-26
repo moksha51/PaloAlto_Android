@@ -3,26 +3,33 @@ package com.example.stengandroid_kotlin
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.toolbox.JsonArrayRequest
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
+import com.example.stengandroid_kotlin.model.Signal
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import android.widget.Toast
-import com.android.volley.Request
-import com.android.volley.Response
-import com.android.volley.VolleyError
-import com.android.volley.toolbox.StringRequest
-import com.android.volley.toolbox.Volley
-import com.example.stengandroid_kotlin.model.Signal
 import org.json.JSONException
 import org.json.JSONObject
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -40,9 +47,15 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var locationClient: LocationClient
 
-    // on below line we are creating a variable for our url.
-    // temporary mock api. to eventually change to http://18.183.118.160:3000/api/post
-    var url = "https://6sgje9hh91.api.quickmocker.com/api/mock/test"
+    val sgDateTimePattern = "dd/MM/yyyy HH:mm z"
+    val sgDateFormatter = DateTimeFormatter.ofPattern(sgDateTimePattern)
+
+    // on below lines we are creating a variable for our url.
+    // temporary mock api. to eventually change to
+    // post: http://18.183.118.160:3000/api/post
+    // get: http://18.183.118.160:3000/api/getAll
+    var urlPost = "https://6sgje9hh91.api.quickmocker.com/api/mock/post"
+    var urlGet = "https://6sgje9hh91.api.quickmocker.com/api/mock/get"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,15 +77,10 @@ class MainActivity : AppCompatActivity() {
 
         checkPermissions()
 
-        // temporarily hardcoded Signal properties
-        var signal = Signal(
-            "1600",
-            38.8951,
-            -77.0364,
-            38.8951,
-            "41",
-            "89816510727414341010",
-            "testcellid1234")
+        // temporarily declared variables for testing
+        var locationLatitude = "0"
+        var locationLongitude = "0"
+        var locationAltitude = "0"
 
         startButton.setOnClickListener {
 
@@ -99,6 +107,10 @@ class MainActivity : AppCompatActivity() {
                         accuracyData.text = getString(R.string.accuracy) + location.accuracy.toString()
                         if (accuracyData.text != getString(R.string.accuracyNA))
                             accuracyData.setBackgroundColor(Color.GREEN)
+
+                        locationLatitude = location.latitude.toString()
+                        locationLongitude = location.longitude.toString()
+                        locationAltitude = location.altitude.toString().take(6)
                     }
                     .launchIn(MainScope())
             }
@@ -127,7 +139,20 @@ class MainActivity : AppCompatActivity() {
                 startButton.setBackgroundColor(Color.BLUE)
                 startButton.text = getString(R.string.start)
             }
-            VolleyService(signal)
+
+            // temporarily hardcoded Signal properties for testing
+            var currentDateTime = LocalDateTime.now()
+            var signal = Signal(
+                currentDateTime,
+                locationLatitude.toDouble(),
+                locationLongitude.toDouble(),
+                locationAltitude.toDouble(),
+                "41",
+                "89816510727414341010",
+                "testcellid1234")
+
+            createSignalVolley(signal)
+            getSignalVolley()
         }
     }
 
@@ -141,7 +166,9 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun VolleyService(signal:Signal){
+    //--------------------------- Start of API calls handling
+
+    private fun createSignalVolley(signal:Signal){
 
         // creating a new variable for our request queue
         val queue = Volley.newRequestQueue(this@MainActivity)
@@ -149,45 +176,15 @@ class MainActivity : AppCompatActivity() {
         // making a string request to update our data and
         // passing method as POST. to update our data.
         val request: StringRequest =
-            object : StringRequest(Request.Method.POST, url, object : Response.Listener<String?> {
+            object : StringRequest(Request.Method.POST, urlPost, object : Response.Listener<String?> {
                 override fun onResponse(response: String?) {
                     // on below line we are displaying a toast message as data updated.
-                    Toast.makeText(this@MainActivity, "Data Updated..", Toast.LENGTH_SHORT).show()
-                    try {
-                        // on below line we are extracting data from our json object
-                        // and passing our response to our json object.
-                        val jsonObject = JSONObject(response)
-
-                        // on below line we are getting data from our response
-                        // and setting it in variables.
-                        val timeStampResp: String = jsonObject.getString("timestamp")
-                        val latDataResp: String = jsonObject.getString("lat")
-                        val longDataResp: String = jsonObject.getString("long")
-                        val altDataResp: String = jsonObject.getString("height")
-                        val snrDataResp: String = jsonObject.getString("snr")
-                        val ueIDResp: String = jsonObject.getString("ueid")
-                        val cellIDResp: String = jsonObject.getString("cellid")
-
-                        // on below line we are setting
-                        // our string to our text view.
-                        timeStampData.text = timeStampResp
-                        latData.text = latDataResp
-                        longData.text = longDataResp
-                        altData.text = altDataResp
-                        snrData.text = snrDataResp
-                        ueID.text = ueIDResp
-                        cellID.text = cellIDResp
-                    } catch (e: JSONException) {
-                        e.printStackTrace()
-                    }
+                    Toast.makeText(this@MainActivity, "Updating Data..", Toast.LENGTH_SHORT).show()
                 }
-            }, object : Response.ErrorListener {
-                override fun onErrorResponse(error: VolleyError?) {
-                    // displaying toast message on response failure.
-                    Log.e("tag", "error is " + error!!.message)
-                    Toast.makeText(this@MainActivity, "Fail to update data..", Toast.LENGTH_SHORT)
-                        .show()
-                }
+            }, Response.ErrorListener { error -> // displaying toast message on response failure.
+                Log.e("tag", "error is " + error!!.message)
+                Toast.makeText(this@MainActivity, "Failed to update data", Toast.LENGTH_SHORT)
+                    .show()
             }) {
                 override fun getParams(): Map<String, String>? {
 
@@ -197,9 +194,9 @@ class MainActivity : AppCompatActivity() {
 
                     // on below line we are passing our key
                     // and value pair to our parameters.
-                    params["timestamp"] = signal.timestamp.toString()
+                    params["timestamp"] = sgDateFormatter.format(ZonedDateTime.of(signal.timestamp, ZoneId.of("GMT+8")))
                     params["lat"] = signal.latitude.toString()
-                    params["long"] = signal.longtitude.toString()
+                    params["long"] = signal.longitude.toString()
                     params["height"] = signal.altitude.toString()
                     params["snr"] = signal.snr.toString()
                     params["ueid"] = signal.ueid.toString()
@@ -213,5 +210,118 @@ class MainActivity : AppCompatActivity() {
         // a json object request.
         queue.add(request)
     }
+
+    /* Retrieving JSONArray
+     */
+    private fun getSignalsVolley()
+    {
+        // on below line we are creating a variable for our
+        // request queue and initializing it.
+        val queue = Volley.newRequestQueue(this@MainActivity)
+
+        // on below line we are creating a variable for request
+        // and initializing it with json object request
+        val request =
+            JsonArrayRequest(Request.Method.GET, urlGet, null,  { response ->
+                // on below line we are displaying a toast message as data is retrieved.
+                Toast.makeText(this@MainActivity, "Data Updated..", Toast.LENGTH_SHORT).show()
+                try {
+                    for (i in 0 until response.length()){
+                        val responseObject = response.getJSONObject(i)
+
+                        // on below line we are getting data from our response
+                        // and setting it in variables.
+                        getJsonResponseString(responseObject)
+
+                        // <INSERT HERE> Set text to ListView using adapter to display each responseObject data
+                        // on below line we are setting
+                        // our string to our text view.
+                        // xxxxx
+
+                    }
+
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                }
+            }, { error ->
+                // displaying toast message on response failure.
+                Log.e("tag", "error is " + error!!.message)
+                Toast.makeText(this@MainActivity, "Failed to get response", Toast.LENGTH_SHORT)
+                    .show()
+            })
+        queue.add(request)
+    }
+
+    /* Retrieving JSONObject
+     */
+    private fun getSignalVolley()
+    {
+
+        // on below line we are creating a variable for our
+        // request queue and initializing it.
+        val queue = Volley.newRequestQueue(this@MainActivity)
+
+        // on below line we are creating a variable for request
+        // and initializing it with json object request
+        val request =
+            JsonObjectRequest(Request.Method.GET, urlGet, null,  { response ->
+                    // on below line we are displaying a toast message as data is retrieved.
+                    Toast.makeText(this@MainActivity, "Data Updated", Toast.LENGTH_SHORT).show()
+                    try {
+                         // on below line we are getting data from our response
+                        // and setting it in variables.
+                        var signal = getJsonResponseString(response)
+
+                        // on below line we are setting
+                        // our string to our text view.
+                        setJsonResponseStringToView(signal)
+
+                    } catch (e: JSONException) {
+                        e.printStackTrace()
+                    }
+            }, { error ->
+                    // displaying toast message on response failure.
+                    Log.e("tag", "error is " + error!!.message)
+                    Toast.makeText(this@MainActivity, "Failed to get response", Toast.LENGTH_SHORT)
+                        .show()
+            })
+        queue.add(request)
+    }
+
+    // To retrieve data of Signal properties from JSONObject
+    private fun getJsonResponseString(response: JSONObject): Signal {
+        val timeStampResp: String = response.getString("timestamp")
+        val latDataResp: Double = response.getDouble("lat")
+        val longDataResp: Double = response.getDouble("long")
+        val altDataResp: Double = response.getDouble("height")
+        val snrDataResp: String = response.getString("snr")
+        val ueIDResp: String = response.getString("ueid")
+        val cellIDResp: String = response.getString("cellid")
+
+        val timeStampRespDT = LocalDateTime.parse(timeStampResp, sgDateFormatter)
+
+        return Signal(
+            timeStampRespDT,
+            latDataResp,
+            longDataResp,
+            altDataResp,
+            snrDataResp,
+            ueIDResp,
+            cellIDResp
+        )
+    }
+
+    // To display data of Signal properties on layout view
+    private fun setJsonResponseStringToView(signal: Signal){
+        timeStampData.text = signal.timestamp.toString()
+        latData.text = signal.latitude.toString()
+        longData.text = signal.longitude.toString()
+        altData.text = signal.altitude.toString()
+        snrData.text = signal.snr.toString()
+        ueID.text = signal.ueid.toString()
+        cellID.text = signal.cellid.toString()
+    }
+
+    //--------------------------- End of API calls handling
 
 }
