@@ -10,168 +10,116 @@
         android:id="@+id/textView_Latitude"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Latitude:"
+        android:text="@string/latitudeNA"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@id/textView_Latitude_Data"
-        android:padding="20dp"/>
+        app:layout_constraintRight_toLeftOf="@id/textView_Longitude"
+        app:layout_constraintHorizontal_weight="1"
+        android:padding="15dp" />
 
     <TextView
-        android:id="@+id/textView_Latitude_Data"
+        android:id="@+id/textView_Longitude"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="lat data"
+        android:text="@string/longitudeNA"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toRightOf="@id/textView_Latitude"
-        app:layout_constraintRight_toLeftOf="@id/textView_SNR"
+        app:layout_constraintRight_toLeftOf="@id/textView_Altitude"
         app:layout_constraintHorizontal_weight="1"
-        android:padding="20dp" />
-
-    <TextView
-        android:id="@+id/textView_SNR"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="20dp"
-        android:text="SNR:"
-        app:layout_constraintHorizontal_weight="1"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintLeft_toRightOf="@id/textView_Latitude_Data"
-        app:layout_constraintRight_toLeftOf="@id/textView_SNR_Data"/>
-
-    <TextView
-        android:id="@+id/textView_SNR_Data"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="20dp"
-        android:text="SNR data"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintHorizontal_weight="1"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintLeft_toRightOf="@+id/textView_SNR" />
-
-    <TextView
-        android:id="@+id/textView_longitude"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Longitude:"
-        android:padding="20dp"
-        app:layout_constraintHorizontal_weight="1"
-        app:layout_constraintTop_toBottomOf="@id/textView_Latitude"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@+id/textView_Longitude_Data"/>
-
-    <TextView
-        android:id="@+id/textView_Longitude_Data"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="long data"
-        android:padding="20dp"
-        app:layout_constraintTop_toBottomOf="@id/textView_Latitude_Data"
-        app:layout_constraintLeft_toRightOf="@id/textView_longitude"
-        app:layout_constraintRight_toLeftOf="@+id/textView_UEID" />
-
-    <TextView
-        android:id="@+id/textView_UEID"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="UEID:"
-        android:padding="20dp"
-        app:layout_constraintTop_toBottomOf="@id/textView_SNR"
-        app:layout_constraintLeft_toRightOf="@id/textView_Longitude_Data"
-        app:layout_constraintRight_toLeftOf="@+id/textView_UEID_Data" />
-
-    <TextView
-        android:id="@+id/textView_UEID_Data"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="UEID data"
-        android:padding="20dp"
-        app:layout_constraintTop_toBottomOf="@id/textView_SNR_Data"
-        app:layout_constraintLeft_toRightOf="@id/textView_UEID"
-        app:layout_constraintRight_toRightOf="parent"/>
+        android:padding="15dp" />
 
     <TextView
         android:id="@+id/textView_Altitude"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Altitude:"
-        android:padding="20dp"
-        app:layout_constraintTop_toBottomOf="@id/textView_longitude"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@id/textView_Altitude_Data" />
+        android:text="@string/altitudeNA"
+        android:padding="15dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/textView_Longitude"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintHorizontal_weight="1"/>
 
     <TextView
-        android:id="@+id/textView_Altitude_Data"
+        android:id="@+id/textView_SNR"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="alt data"
-        android:padding="20dp"
-        app:layout_constraintTop_toBottomOf="@id/textView_Longitude_Data"
-        app:layout_constraintLeft_toRightOf="@id/textView_Altitude"
-        app:layout_constraintRight_toLeftOf="@id/textView_CELLID" />
+        android:padding="15dp"
+        android:text="@string/altitudeNA"
+        app:layout_constraintTop_toBottomOf="@id/textView_Latitude"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/textView_UEID"
+        app:layout_constraintHorizontal_weight="1"/>
+
+    <TextView
+        android:id="@+id/textView_UEID"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/UEIDNA"
+        android:padding="15dp"
+        app:layout_constraintTop_toBottomOf="@id/textView_Longitude"
+        app:layout_constraintLeft_toRightOf="@id/textView_SNR"
+        app:layout_constraintRight_toLeftOf="@+id/textView_CELLID"
+        app:layout_constraintHorizontal_weight="1"/>
 
     <TextView
         android:id="@+id/textView_CELLID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Cell ID:"
-        android:padding="20dp"
-        app:layout_constraintTop_toBottomOf="@id/textView_UEID"
-        app:layout_constraintLeft_toRightOf="@id/textView_Altitude_Data"
-        app:layout_constraintRight_toLeftOf="@id/textView_CELLID_Data" />
+        android:text="@string/CELLIDNA"
+        android:padding="15dp"
+        app:layout_constraintTop_toBottomOf="@id/textView_Altitude"
+        app:layout_constraintLeft_toRightOf="@id/textView_UEID"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintHorizontal_weight="1"/>
 
     <TextView
-        android:id="@+id/textView_CELLID_Data"
+        android:id="@+id/textView_Accuracy"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Cell ID data"
-        android:padding="20dp"
-        app:layout_constraintTop_toBottomOf="@id/textView_UEID_Data"
-        app:layout_constraintLeft_toRightOf="@id/textView_CELLID"
-        app:layout_constraintRight_toRightOf="parent"  />
-
-
-    <Button
-        android:id="@+id/Button_Start"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="START"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.51"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.645" />
+        android:text="@string/accuracyNA"
+        android:padding="15dp"
+        app:layout_constraintTop_toBottomOf="@id/textView_SNR"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintHorizontal_weight="1"/>
 
     <TextView
         android:id="@+id/timer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="HH:MM:SS"
-        app:layout_constraintBottom_toTopOf="@+id/Button_End"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/timeStamp"/>
+        app:layout_constraintBottom_toBottomOf="parent" />
 
     <TextView
-        android:id="@+id/timeStamp"
+        android:id="@+id/textView_timeStamp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Current Date Time"
+        android:text="HH:MM:SS"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/Button_Start"/>
+        app:layout_constraintBottom_toBottomOf="parent" />
 
     <Button
-        android:id="@+id/Button_End"
+        android:id="@+id/Button_Start"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="120dp"
-        android:text="END"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="@string/start"
+        android:layout_marginTop="80dp"
+        app:layout_constraintTop_toBottomOf="@id/timer"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.51"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"/>
 
+    <Button
+        android:id="@+id/Button_Stop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/stop"
+        android:layout_marginTop="80dp"
+        app:layout_constraintTop_toBottomOf="@id/Button_Start"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
