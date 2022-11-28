@@ -42,6 +42,7 @@ class MainActivity : AppCompatActivity() {
 
     // on below line we are creating a variable for our url.
     // temporary mock api. to eventually change to http://18.183.118.160:3000/api/post
+    // test
     var url = "https://6sgje9hh91.api.quickmocker.com/api/mock/test"
 
     override fun onCreate(savedInstanceState: Bundle?) {
