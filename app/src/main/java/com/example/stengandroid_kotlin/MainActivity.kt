@@ -1,13 +1,19 @@
 package com.example.stengandroid_kotlin
 
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.provider.Settings
+import android.telephony.*
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.android.volley.Request
@@ -28,7 +34,6 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 
 
 class MainActivity : AppCompatActivity() {
@@ -49,6 +54,12 @@ class MainActivity : AppCompatActivity() {
 
     val sgDateTimePattern = "dd/MM/yyyy HH:mm z"
     val sgDateFormatter = DateTimeFormatter.ofPattern(sgDateTimePattern)
+
+    var deviceId = ""
+
+    var handler: Handler = Handler()
+    var runnable: Runnable? = null
+    var delay = 3000
 
     // on below lines we are creating a variable for our url.
     // temporary mock api. to eventually change to
@@ -77,12 +88,17 @@ class MainActivity : AppCompatActivity() {
 
         checkPermissions()
 
+        // Retrieve Unique User Equipment ID
+        deviceId = getUniqueDeviceID().toString()
+
         // temporarily declared variables for testing
         var locationLatitude = "0"
         var locationLongitude = "0"
         var locationAltitude = "0"
 
         startButton.setOnClickListener {
+
+            startDataPullAtIntervals()
 
             Intent(applicationContext, LocationService::class.java).apply{
                 action = LocationService.ACTION_START
@@ -108,9 +124,9 @@ class MainActivity : AppCompatActivity() {
                         if (accuracyData.text != getString(R.string.accuracyNA))
                             accuracyData.setBackgroundColor(Color.GREEN)
 
-                        locationLatitude = location.latitude.toString()
-                        locationLongitude = location.longitude.toString()
-                        locationAltitude = location.altitude.toString().take(6)
+//                        locationLatitude = location.latitude.toString()
+//                        locationLongitude = location.longitude.toString()
+//                        locationAltitude = location.altitude.toString().take(6)
                     }
                     .launchIn(MainScope())
             }
@@ -141,20 +157,21 @@ class MainActivity : AppCompatActivity() {
             }
 
             // temporarily hardcoded Signal properties for testing
-            var currentDateTime = LocalDateTime.now()
-            var signal = Signal(
-                currentDateTime,
-                locationLatitude.toDouble(),
-                locationLongitude.toDouble(),
-                locationAltitude.toDouble(),
-                "41",
-                "89816510727414341010",
-                "testcellid1234")
+//            var currentDateTime = LocalDateTime.now()
+//            var signal = Signal(
+//                currentDateTime,
+//                locationLatitude.toDouble(),
+//                locationLongitude.toDouble(),
+//                locationAltitude.toDouble(),
+//                "41",
+//                "89816510727414341010",
+//                "testcellid1234")
 
-            createSignalVolley(signal)
-            getSignalVolley()
+//            createSignalVolley(signal)
+//            getSignalVolley()
         }
     }
+
 
     private fun checkPermissions(){
         if(ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED &&
@@ -166,28 +183,202 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+
+    //--------------------------- Start of calling methods at intervals
+
+    // Currently, calling functions at 1 second interval
+    private fun startDataPullAtIntervals(){
+        handler.postDelayed(object : Runnable {
+            override fun run() {
+                getSignalStrength().toString()
+                // Retrieving Signal Strength in dbm
+                var currentDateTime = LocalDateTime.now()
+                var snr = sigStr.toString()
+                var locationLatitude = 111111.1
+                var locationLongitude = 222222.2
+                var locationAltitude = 3333333.3
+                var cellId = "iamadrone5678"
+
+                var signal = Signal(
+                    currentDateTime,
+                    locationLatitude,
+                    locationLongitude,
+                    locationAltitude,
+                    snr,
+                    deviceId,
+                    cellId)
+
+                Log.v("idempotent", "i am RUNNING every sec")
+                Toast.makeText(
+                    this@MainActivity, "This method is running every 1 second",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                createSignalVolley(signal)
+                Log.v("idempotent", "i am POSTING every sec")
+
+                handler.postDelayed(this, delay.toLong())
+            }
+        }, delay.toLong())
+    }
+
+//    private fun stopDataPullAtIntervals(){
+//        handler.removeCallbacks(runnable)
+//    }
+
+
+    //--------------------------- End of calling methods at intervals
+
+
+    //--------------------------- Start of Signal Strength Retrieval
+    val telephonyManager: TelephonyManager =
+        this.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+
+    var sigStrCallbackThingy:TelephonyCallback? = null
+    var sigStrDeprecatedCallback:PhoneStateListener? = null
+    var sigStr: Int? = null
+
+    fun killListeners(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            sigStrCallbackThingy?.let {
+                telephonyManager.unregisterTelephonyCallback(it)
+                Log.v("idempotent","sigStrCallbackThingy unregistered")
+            }}
+            else {
+                Log.v("idempotent", "old stuff")
+                sigStrDeprecatedCallback?.let {
+                    telephonyManager.listen(
+                        sigStrDeprecatedCallback,
+                        PhoneStateListener.LISTEN_NONE
+                    )
+                    Log.v("idempotent", "sigStrCallbackThingy unregistered")
+                }
+            }
+    }
+
+    private fun getSignalStrength(): Int?{
+        killListeners()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+//            sigStrCallbackThingy?.let {
+//                telephonyManager.unregisterTelephonyCallback(it)
+//                Log.v("idempotent","sigStrCallbackThingy unregistered")
+//            }
+            telephonyManager.registerTelephonyCallback(this.mainExecutor, testCb())
+
+
+//            telephonyManager.registerTelephonyCallback(
+//                this.mainExecutor,
+//                testCb()
+//                object : TelephonyCallback(), TelephonyCallback.SignalStrengthsListener {
+//                    override fun onSignalStrengthsChanged(signalStrength: SignalStrength) {
+//                        var listSig: List<CellSignalStrength> = signalStrength.cellSignalStrengths
+//                        for (sig in listSig){
+//                            if (sig is CellSignalStrengthNr){
+//                                sigStr = sig.dbm
+//                                Log.v("idempotent","Nr found " + sig.dbm)
+//                            } else {
+//                                sigStr = sig.dbm
+//                                Log.v("idempotent","Other sig found " + sig.dbm)
+//                            }
+//                        }
+//                    }
+//                }
+//                        )
+        } else {
+            Log.v("idempotent","old stuff")
+//            sigStrDeprecatedCallback?.let {
+//                telephonyManager.listen(sigStrDeprecatedCallback, PhoneStateListener.LISTEN_NONE)
+//                Log.v("idempotent","sigStrCallbackThingy unregistered")
+//            }
+            telephonyManager.listen(testCb2(),PhoneStateListener.LISTEN_SIGNAL_STRENGTHS)
+//            telephonyManager.listen(object : PhoneStateListener() {
+//                override fun onSignalStrengthsChanged(signalStrength: SignalStrength?) {
+//
+//                }
+//            }, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS)
+        }
+
+        return sigStr
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    fun testCb():TelephonyCallback{
+       var cb = object : TelephonyCallback(), TelephonyCallback.SignalStrengthsListener {
+            override fun onSignalStrengthsChanged(signalStrength: SignalStrength) {
+                processSignalStrengthData(signalStrength)
+            }
+        }
+        sigStrCallbackThingy = cb;
+        Log.v("idempotent","sigStrCallbackThingy assigned")
+        return cb
+    }
+
+    fun testCb2():PhoneStateListener{
+        var cb = object : PhoneStateListener() {
+            @Deprecated("Deprecated in Java")
+            override fun onSignalStrengthsChanged(signalStrength: SignalStrength?) {
+                if (signalStrength != null) {
+                    processSignalStrengthData(signalStrength)
+                }
+            }
+        }
+        sigStrDeprecatedCallback = cb
+        return cb
+    }
+
+
+
+    fun processSignalStrengthData(signalStrength:SignalStrength){
+        var listSig: List<CellSignalStrength> = signalStrength.cellSignalStrengths
+        for (sig in listSig){
+            if (sig is CellSignalStrengthNr){
+                sigStr = sig.dbm
+                Log.v("idempotent","Nr found " + sig.dbm)
+            } else {
+                sigStr = sig.dbm
+                Log.v("idempotent","Other sig found " + sig.dbm)
+            }
+        }
+    }
+    //--------------------------- End of Signal Strength Retrieval
+
+
+    //--------------------------- Start of Device ID Retrieval
+
+    fun getUniqueDeviceID(): String? {
+        var uniqueDeviceId: String? = ""
+        uniqueDeviceId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+        Log.v("idempotent", "i am your DEVICE ID " + uniqueDeviceId)
+        return uniqueDeviceId
+    }
+
+    //--------------------------- End of Device ID Retrieval
+
+
     //--------------------------- Start of API calls handling
 
     private fun createSignalVolley(signal:Signal){
-
+        Log.v("idempotent", "post 1")
         // creating a new variable for our request queue
         val queue = Volley.newRequestQueue(this@MainActivity)
-
+        Log.v("idempotent", "post 2")
         // making a string request to update our data and
         // passing method as POST. to update our data.
         val request: StringRequest =
             object : StringRequest(Request.Method.POST, urlPost, object : Response.Listener<String?> {
                 override fun onResponse(response: String?) {
+                    Log.v("idempotent", "post 3")
                     // on below line we are displaying a toast message as data updated.
-                    Toast.makeText(this@MainActivity, "Updating Data..", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity, "Storing Data..", Toast.LENGTH_SHORT).show()
                 }
             }, Response.ErrorListener { error -> // displaying toast message on response failure.
                 Log.e("tag", "error is " + error!!.message)
-                Toast.makeText(this@MainActivity, "Failed to update data", Toast.LENGTH_SHORT)
+                Toast.makeText(this@MainActivity, "Failed to store data", Toast.LENGTH_SHORT)
                     .show()
             }) {
                 override fun getParams(): Map<String, String>? {
-
+                    Log.v("idempotent", "post 4")
                     // below line we are creating a map for storing
                     // our values in key and value pair.
                     val params: MutableMap<String, String> = HashMap()
