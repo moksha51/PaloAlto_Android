@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="Home"
+        android:id="@+id/Button_Home"
+        android:icon="@drawable/ic_baseline_home_24"/>
+    <item android:title="Log"
+        android:id="@+id/Button_Log"
+        android:icon="@drawable/ic_baseline_log_24"/>
+    <item android:title="Map"
+        android:id="@+id/Button_Map"
+        android:icon="@drawable/ic_baseline_map_24"/>
+</menu>
