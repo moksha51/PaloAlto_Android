@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
@@ -15,29 +16,34 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import android.widget.Toast
+import androidx.compose.ui.input.key.Key.Companion.Home
+import androidx.fragment.app.Fragment
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.example.stengandroid_kotlin.R.*
 import com.example.stengandroid_kotlin.model.Signal
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import org.json.JSONException
 import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var startButton : Button
-    private lateinit var stopButton : Button
+//    private lateinit var startButton : Button
+//    private lateinit var stopButton : Button
+//
+//    private lateinit var timeStampData : TextView
+//    private lateinit var latData : TextView
+//    private lateinit var longData : TextView
+//    private lateinit var altData : TextView
+//    private lateinit var snrData : TextView
+//    private lateinit var cellID : TextView
+//    private lateinit var ueID : TextView
+//    private lateinit var accuracyData : TextView
 
-    private lateinit var timeStampData : TextView
-    private lateinit var latData : TextView
-    private lateinit var longData : TextView
-    private lateinit var altData : TextView
-    private lateinit var snrData : TextView
-    private lateinit var cellID : TextView
-    private lateinit var ueID : TextView
-    private lateinit var accuracyData : TextView
-
+    private lateinit var bottomNavigationView : BottomNavigationView
     private lateinit var locationClient: LocationClient
 
     // on below line we are creating a variable for our url.
@@ -47,21 +53,26 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(layout.activity_main)
+
+        bottomNavigationView = findViewById(R.id.bottomNavigationView)
+
+        replaceFragment(HomeFragment())
+
+        bottomNavigationView.setOnItemSelectedListener {
+
+            when (it.itemId){
+                id.Button_Home -> replaceFragment(HomeFragment())
+                id.Button_Log -> replaceFragment(LogFragment())
+                id.Button_Map -> replaceFragment(MapFragment())
+
+                else -> {}
+            }
+            true
+        }
 
         locationClient = DefaultLocationClient(applicationContext, LocationServices.getFusedLocationProviderClient(applicationContext))
 
-        timeStampData = findViewById(R.id.textView_timeStamp)
-        latData = findViewById(R.id.textView_Latitude)
-        longData = findViewById(R.id.textView_Longitude)
-        altData = findViewById(R.id.textView_Altitude)
-        snrData = findViewById(R.id.textView_SNR)
-        cellID = findViewById(R.id.textView_CELLID)
-        ueID = findViewById(R.id.textView_UEID)
-        accuracyData = findViewById(R.id.textView_Accuracy)
-
-        startButton = findViewById(R.id.Button_Start)
-        stopButton = findViewById(R.id.Button_Stop)
 
         checkPermissions()
 
@@ -75,61 +86,61 @@ class MainActivity : AppCompatActivity() {
             "89816510727414341010",
             "testcellid1234")
 
-        startButton.setOnClickListener {
-
-            Intent(applicationContext, LocationService::class.java).apply{
-                action = LocationService.ACTION_START
-                startService(this)
-                locationClient
-                    //interval 1000L = 1 sec, 10000L = 10 secs
-                    .getLocationUpdates(1000L)
-                    .catch {  e -> e.printStackTrace()}
-                    .onEach { location ->
-                        latData.text = getString(R.string.latitude) + location.latitude.toString()
-                        if (latData.text != getString(R.string.latitudeNA))
-                            latData.setBackgroundColor(Color.GREEN)
-
-                        longData.text = getString(R.string.longitude) + location.longitude.toString()
-                        if (longData.text != getString(R.string.longitudeNA))
-                            longData.setBackgroundColor(Color.GREEN)
-
-                        altData.text = getString(R.string.altitude) + location.altitude.toString().take(6)
-                        if (altData.text != getString(R.string.altitudeNA))
-                            altData.setBackgroundColor(Color.GREEN)
-
-                        accuracyData.text = getString(R.string.accuracy) + location.accuracy.toString()
-                        if (accuracyData.text != getString(R.string.accuracyNA))
-                            accuracyData.setBackgroundColor(Color.GREEN)
-                    }
-                    .launchIn(MainScope())
-            }
-            startButton.setBackgroundColor(Color.GREEN)
-            startButton.text = getString(R.string.live)
-        }
-
-        stopButton.setOnClickListener {
-            Intent(applicationContext, LocationService::class.java).apply {
-                action = LocationService.ACTION_STOP
-                startService(this)
-
-                latData.text = getString(R.string.latitudeNA)
-                latData.setBackgroundColor(Color.WHITE)
-
-                longData.text = getString(R.string.longitudeNA)
-                longData.setBackgroundColor(Color.WHITE)
-
-                altData.text = getString(R.string.altitudeNA)
-                altData.setBackgroundColor(Color.WHITE)
-
-                accuracyData.text = getString(R.string.accuracyNA)
-                accuracyData.setBackgroundColor(Color.WHITE)
-
-                stopService(this)
-                startButton.setBackgroundColor(Color.BLUE)
-                startButton.text = getString(R.string.start)
-            }
-            VolleyService(signal)
-        }
+//        startButton.setOnClickListener {
+//
+//            Intent(applicationContext, LocationService::class.java).apply{
+//                action = LocationService.ACTION_START
+//                startService(this)
+//                locationClient
+//                    //interval 1000L = 1 sec, 10000L = 10 secs
+//                    .getLocationUpdates(1000L)
+//                    .catch {  e -> e.printStackTrace()}
+//                    .onEach { location ->
+//                        latData.text = getString(string.latitude) + location.latitude.toString()
+//                        if (latData.text != getString(string.latitudeNA))
+//                            latData.setBackgroundColor(Color.GREEN)
+//
+//                        longData.text = getString(string.longitude) + location.longitude.toString()
+//                        if (longData.text != getString(string.longitudeNA))
+//                            longData.setBackgroundColor(Color.GREEN)
+//
+//                        altData.text = getString(string.altitude) + location.altitude.toString().take(6)
+//                        if (altData.text != getString(string.altitudeNA))
+//                            altData.setBackgroundColor(Color.GREEN)
+//
+//                        accuracyData.text = getString(string.accuracy) + location.accuracy.toString()
+//                        if (accuracyData.text != getString(string.accuracyNA))
+//                            accuracyData.setBackgroundColor(Color.GREEN)
+//                    }
+//                    .launchIn(MainScope())
+//            }
+//            startButton.setBackgroundColor(Color.GREEN)
+//            startButton.text = getString(string.live)
+//        }
+//
+//        stopButton.setOnClickListener {
+//            Intent(applicationContext, LocationService::class.java).apply {
+//                action = LocationService.ACTION_STOP
+//                startService(this)
+//
+//                latData.text = getString(string.latitudeNA)
+//                latData.setBackgroundColor(Color.WHITE)
+//
+//                longData.text = getString(string.longitudeNA)
+//                longData.setBackgroundColor(Color.WHITE)
+//
+//                altData.text = getString(string.altitudeNA)
+//                altData.setBackgroundColor(Color.WHITE)
+//
+//                accuracyData.text = getString(string.accuracyNA)
+//                accuracyData.setBackgroundColor(Color.WHITE)
+//
+//                stopService(this)
+//                startButton.setBackgroundColor(Color.BLUE)
+//                startButton.text = getString(string.start)
+//            }
+//            VolleyService(signal)
+//        }
     }
 
     private fun checkPermissions(){
@@ -171,13 +182,13 @@ class MainActivity : AppCompatActivity() {
 
                         // on below line we are setting
                         // our string to our text view.
-                        timeStampData.text = timeStampResp
-                        latData.text = latDataResp
-                        longData.text = longDataResp
-                        altData.text = altDataResp
-                        snrData.text = snrDataResp
-                        ueID.text = ueIDResp
-                        cellID.text = cellIDResp
+//                        timeStampData.text = timeStampResp
+//                        latData.text = latDataResp
+//                        longData.text = longDataResp
+//                        altData.text = altDataResp
+//                        snrData.text = snrDataResp
+//                        ueID.text = ueIDResp
+//                        cellID.text = cellIDResp
                     } catch (e: JSONException) {
                         e.printStackTrace()
                     }
@@ -213,6 +224,14 @@ class MainActivity : AppCompatActivity() {
         // below line is to make
         // a json object request.
         queue.add(request)
+    }
+
+    private fun replaceFragment(fragment: Fragment){
+
+        val fragmentManager = supportFragmentManager
+        val fragmentTransaction = fragmentManager.beginTransaction()
+        fragmentTransaction.replace(id.frame_layout, fragment)
+        fragmentTransaction.commit()
     }
 
 }
