@@ -21,7 +21,13 @@ import androidx.core.app.ActivityCompat
 import androidx.compose.ui.input.key.Key.Companion.Home
 import androidx.fragment.app.Fragment
 import com.android.volley.Request
+import com.android.volley.RequestQueue
 import com.android.volley.Response
+
+import com.android.volley.VolleyError
+import com.android.volley.toolbox.*
+import com.example.stengandroid_kotlin.model.Signal
+import com.example.stengandroid_kotlin.model.VolleySingleton
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
@@ -72,6 +78,10 @@ class MainActivity : AppCompatActivity() {
     var telephonyManager: TelephonyManager? = null
 
 
+    // on below line we are creating a variable for our url.
+    // temporary mock api. to eventually change to http://18.183.118.160:3000/api/post
+    private var url = "https://18.183.118.160:3000/api/post"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(layout.activity_main)
@@ -101,8 +111,20 @@ class MainActivity : AppCompatActivity() {
 
         checkPermissions()
 
+/*leon's code
+
+        val cache = DiskBasedCache(cacheDir, 1024 * 1024) // 1MB cap
+
+// Set up the network to use HttpURLConnection as the HTTP client.
+        val network = BasicNetwork(HurlStack())
+
+// Instantiate the RequestQueue with the cache and network. Start the queue.
+        val requestQueue = RequestQueue(cache, network).apply {
+            start()
+        }
         // Retrieve Unique User Equipment ID
         deviceId = getUniqueDeviceID().toString()
+*/
     }
 
 
@@ -278,6 +300,27 @@ class MainActivity : AppCompatActivity() {
         Log.v("idempotent", "post 1")
         // creating a new variable for our request queue
         val queue = Volley.newRequestQueue(this@MainActivity)
+/*leon's code
+        val json = JSONObject()
+        json.put("timestamp", signal.timestamp)
+        json.put("lat", signal.latitude.toString())
+        json.put("long", signal.longtitude.toString())
+        json.put("height", signal.altitude.toString())
+        json.put("snr", signal.snr)
+        json.put("cellid", signal.cellid)
+        json.put("ueid", signal.ueid)
+        // making a string request to update our data and
+        // passing method as POST. to update our data.
+        val jsonObjectRequest =
+                JsonObjectRequest(Request.Method.POST, url, json, { response ->
+                    val str = response.toString()
+                    Toast.makeText(this, str, Toast.LENGTH_SHORT)
+                    println(str)
+                }, {
+                        error ->
+                    Log.d("TAG","response: ${error.message}")
+                })
+*/
         Log.v("idempotent", "post 2")
         // making a string request to update our data and
         // passing method as POST. to update our data.
@@ -314,9 +357,7 @@ class MainActivity : AppCompatActivity() {
                     return params
                 }
             }
-        // below line is to make
-        // a json object request.
-        queue.add(request)
+        VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest)
     }
 
 
