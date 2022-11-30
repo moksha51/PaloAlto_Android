@@ -52,25 +52,22 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var locationClient: LocationClient
 
-    val sgDateTimePattern = "dd/MM/yyyy HH:mm z"
-    val sgDateFormatter = DateTimeFormatter.ofPattern(sgDateTimePattern)
+    var locationLatitude: Double? = null
+    var locationLongitude: Double? = null
+    var locationAltitude: Double? = null
 
     var deviceId = ""
 
-    var handler: Handler = Handler()
-    var runnable: Runnable? = null
-    var delay = 3000
+    val sgDateTimePattern = "dd/MM/yyyy HH:mm z"
+    val sgDateFormatter = DateTimeFormatter.ofPattern(sgDateTimePattern)
 
-    // on below lines we are creating a variable for our url.
-    // temporary mock api. to eventually change to
-    // post: http://18.183.118.160:3000/api/post
-    // get: http://18.183.118.160:3000/api/getAll
-    var urlPost = "https://6sgje9hh91.api.quickmocker.com/api/mock/post"
-    var urlGet = "https://6sgje9hh91.api.quickmocker.com/api/mock/get"
+    var telephonyManager: TelephonyManager? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        telephonyManager = this.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
 
         locationClient = DefaultLocationClient(applicationContext, LocationServices.getFusedLocationProviderClient(applicationContext))
 
@@ -91,14 +88,10 @@ class MainActivity : AppCompatActivity() {
         // Retrieve Unique User Equipment ID
         deviceId = getUniqueDeviceID().toString()
 
-        // temporarily declared variables for testing
-        var locationLatitude = "0"
-        var locationLongitude = "0"
-        var locationAltitude = "0"
 
         startButton.setOnClickListener {
 
-            startDataPullAtIntervals()
+            startHandler()
 
             Intent(applicationContext, LocationService::class.java).apply{
                 action = LocationService.ACTION_START
@@ -124,14 +117,15 @@ class MainActivity : AppCompatActivity() {
                         if (accuracyData.text != getString(R.string.accuracyNA))
                             accuracyData.setBackgroundColor(Color.GREEN)
 
-//                        locationLatitude = location.latitude.toString()
-//                        locationLongitude = location.longitude.toString()
-//                        locationAltitude = location.altitude.toString().take(6)
+                        locationLatitude = location.latitude
+                        locationLongitude = location.longitude
+                        locationAltitude = location.altitude
                     }
                     .launchIn(MainScope())
             }
             startButton.setBackgroundColor(Color.GREEN)
             startButton.text = getString(R.string.live)
+
         }
 
         stopButton.setOnClickListener {
@@ -156,19 +150,7 @@ class MainActivity : AppCompatActivity() {
                 startButton.text = getString(R.string.start)
             }
 
-            // temporarily hardcoded Signal properties for testing
-//            var currentDateTime = LocalDateTime.now()
-//            var signal = Signal(
-//                currentDateTime,
-//                locationLatitude.toDouble(),
-//                locationLongitude.toDouble(),
-//                locationAltitude.toDouble(),
-//                "41",
-//                "89816510727414341010",
-//                "testcellid1234")
-
-//            createSignalVolley(signal)
-//            getSignalVolley()
+            stopHandler()
         }
     }
 
@@ -184,137 +166,95 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    //--------------------------- Start of calling methods at intervals
+    //--------------------------- Start of Handler for getting data
 
-    // Currently, calling functions at 1 second interval
-    private fun startDataPullAtIntervals(){
-        handler.postDelayed(object : Runnable {
-            override fun run() {
-                getSignalStrength().toString()
-                // Retrieving Signal Strength in dbm
-                var currentDateTime = LocalDateTime.now()
-                var snr = sigStr.toString()
-                var locationLatitude = 111111.1
-                var locationLongitude = 222222.2
-                var locationAltitude = 3333333.3
-                var cellId = "iamadrone5678"
+    var handler: Handler = Handler()
+    var delay = 5000 // Currently, calling functions at 5 seconds interval
 
-                var signal = Signal(
-                    currentDateTime,
-                    locationLatitude,
-                    locationLongitude,
-                    locationAltitude,
-                    snr,
-                    deviceId,
-                    cellId)
+    var myRunnable = object : Runnable {
+        override fun run() {
+            createSignalObj()
+            Log.v("idempotent", "i am RUNNING")
+            Toast.makeText(
+                this@MainActivity, "i am RUNNING",
+                Toast.LENGTH_SHORT
+            ).show()
+            Log.v("idempotent", "i am POSTING")
 
-                Log.v("idempotent", "i am RUNNING every sec")
-                Toast.makeText(
-                    this@MainActivity, "This method is running every 1 second",
-                    Toast.LENGTH_SHORT
-                ).show()
-
-                createSignalVolley(signal)
-                Log.v("idempotent", "i am POSTING every sec")
-
-                handler.postDelayed(this, delay.toLong())
-            }
-        }, delay.toLong())
+            handler.postDelayed(this, delay.toLong())
+        }
     }
 
-//    private fun stopDataPullAtIntervals(){
-//        handler.removeCallbacks(runnable)
-//    }
+    private fun startHandler(){
+        handler.postDelayed(myRunnable, delay.toLong())
+        Log.v("idempotent", "start handle")
+    }
 
+    private fun stopHandler(){
+        stopListeners()
+        handler.removeCallbacks(myRunnable)
+        Log.v("idempotent", "stop handle")
+    }
 
-    //--------------------------- End of calling methods at intervals
+    private fun createSignalObj(){
+        getSignalStrength().toString()
+        var snr = sigStr.toString()
+
+        var currentDateTime = LocalDateTime.now()
+
+        var locationLatitudeSig = locationLatitude
+        var locationLongitudeSig = locationLongitude
+        var locationAltitudeSig = locationAltitude
+
+        var cellId = "iamadrone5678"
+
+        var signal = Signal(
+            currentDateTime,
+            locationLatitudeSig,
+            locationLongitudeSig,
+            locationAltitudeSig,
+            snr,
+            deviceId,
+            cellId)
+
+        createSignalVolley(signal)
+    }
+
+    //--------------------------- End of handler for getting data
 
 
     //--------------------------- Start of Signal Strength Retrieval
-    val telephonyManager: TelephonyManager =
-        this.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
 
-    var sigStrCallbackThingy:TelephonyCallback? = null
-    var sigStrDeprecatedCallback:PhoneStateListener? = null
+    var sigStrTelCallback:TelephonyCallback? = null
+    var sigStrPSLCallback:PhoneStateListener? = null
     var sigStr: Int? = null
 
-    fun killListeners(){
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            sigStrCallbackThingy?.let {
-                telephonyManager.unregisterTelephonyCallback(it)
-                Log.v("idempotent","sigStrCallbackThingy unregistered")
-            }}
-            else {
-                Log.v("idempotent", "old stuff")
-                sigStrDeprecatedCallback?.let {
-                    telephonyManager.listen(
-                        sigStrDeprecatedCallback,
-                        PhoneStateListener.LISTEN_NONE
-                    )
-                    Log.v("idempotent", "sigStrCallbackThingy unregistered")
-                }
-            }
-    }
-
     private fun getSignalStrength(): Int?{
-        killListeners()
+        stopListeners()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-//            sigStrCallbackThingy?.let {
-//                telephonyManager.unregisterTelephonyCallback(it)
-//                Log.v("idempotent","sigStrCallbackThingy unregistered")
-//            }
-            telephonyManager.registerTelephonyCallback(this.mainExecutor, testCb())
-
-
-//            telephonyManager.registerTelephonyCallback(
-//                this.mainExecutor,
-//                testCb()
-//                object : TelephonyCallback(), TelephonyCallback.SignalStrengthsListener {
-//                    override fun onSignalStrengthsChanged(signalStrength: SignalStrength) {
-//                        var listSig: List<CellSignalStrength> = signalStrength.cellSignalStrengths
-//                        for (sig in listSig){
-//                            if (sig is CellSignalStrengthNr){
-//                                sigStr = sig.dbm
-//                                Log.v("idempotent","Nr found " + sig.dbm)
-//                            } else {
-//                                sigStr = sig.dbm
-//                                Log.v("idempotent","Other sig found " + sig.dbm)
-//                            }
-//                        }
-//                    }
-//                }
-//                        )
+            telephonyManager?.registerTelephonyCallback(this.mainExecutor, cbTelephony())
         } else {
-            Log.v("idempotent","old stuff")
-//            sigStrDeprecatedCallback?.let {
-//                telephonyManager.listen(sigStrDeprecatedCallback, PhoneStateListener.LISTEN_NONE)
-//                Log.v("idempotent","sigStrCallbackThingy unregistered")
-//            }
-            telephonyManager.listen(testCb2(),PhoneStateListener.LISTEN_SIGNAL_STRENGTHS)
-//            telephonyManager.listen(object : PhoneStateListener() {
-//                override fun onSignalStrengthsChanged(signalStrength: SignalStrength?) {
-//
-//                }
-//            }, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS)
+            telephonyManager?.listen(cbPhoneStateListener(),PhoneStateListener.LISTEN_SIGNAL_STRENGTHS)
         }
-
         return sigStr
     }
 
+    // For phones on SDK API Ver 31 and newer
     @RequiresApi(Build.VERSION_CODES.S)
-    fun testCb():TelephonyCallback{
+    fun cbTelephony():TelephonyCallback{
        var cb = object : TelephonyCallback(), TelephonyCallback.SignalStrengthsListener {
             override fun onSignalStrengthsChanged(signalStrength: SignalStrength) {
                 processSignalStrengthData(signalStrength)
             }
         }
-        sigStrCallbackThingy = cb;
+        sigStrTelCallback = cb;
         Log.v("idempotent","sigStrCallbackThingy assigned")
         return cb
     }
 
-    fun testCb2():PhoneStateListener{
+    // For phones on SDK API Ver older than 31
+    fun cbPhoneStateListener():PhoneStateListener{
         var cb = object : PhoneStateListener() {
             @Deprecated("Deprecated in Java")
             override fun onSignalStrengthsChanged(signalStrength: SignalStrength?) {
@@ -323,12 +263,11 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        sigStrDeprecatedCallback = cb
+        sigStrPSLCallback = cb
         return cb
     }
 
-
-
+    // Retrieve signal strength in dbm
     fun processSignalStrengthData(signalStrength:SignalStrength){
         var listSig: List<CellSignalStrength> = signalStrength.cellSignalStrengths
         for (sig in listSig){
@@ -341,6 +280,25 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    fun stopListeners(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            sigStrTelCallback?.let {
+                telephonyManager?.unregisterTelephonyCallback(it)
+                Log.v("idempotent","sigStrCallbackThingy unregistered")
+            }}
+        else {
+            Log.v("idempotent", "old stuff")
+            sigStrPSLCallback?.let {
+                telephonyManager?.listen(
+                    sigStrPSLCallback,
+                    PhoneStateListener.LISTEN_NONE
+                )
+                Log.v("idempotent", "sigStrCallbackThingy unregistered")
+            }
+        }
+    }
+
     //--------------------------- End of Signal Strength Retrieval
 
 
@@ -357,6 +315,13 @@ class MainActivity : AppCompatActivity() {
 
 
     //--------------------------- Start of API calls handling
+
+    // on below lines we are creating a variable for our url.
+    // temporary mock api. to eventually change to
+    // post: http://18.183.118.160:3000/api/post
+    // get: http://18.183.118.160:3000/api/getAll
+    var urlPost = "https://6sgje9hh91.api.quickmocker.com/api/mock/post"
+    var urlGet = "https://6sgje9hh91.api.quickmocker.com/api/mock/get"
 
     private fun createSignalVolley(signal:Signal){
         Log.v("idempotent", "post 1")
