@@ -16,11 +16,12 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import android.widget.Toast
 import com.android.volley.Request
+import com.android.volley.RequestQueue
 import com.android.volley.Response
 import com.android.volley.VolleyError
-import com.android.volley.toolbox.StringRequest
-import com.android.volley.toolbox.Volley
+import com.android.volley.toolbox.*
 import com.example.stengandroid_kotlin.model.Signal
+import com.example.stengandroid_kotlin.model.VolleySingleton
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -42,8 +43,7 @@ class MainActivity : AppCompatActivity() {
 
     // on below line we are creating a variable for our url.
     // temporary mock api. to eventually change to http://18.183.118.160:3000/api/post
-    // test
-    var url = "https://6sgje9hh91.api.quickmocker.com/api/mock/test"
+    private var url = "https://18.183.118.160:3000/api/post"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -105,6 +105,7 @@ class MainActivity : AppCompatActivity() {
             }
             startButton.setBackgroundColor(Color.GREEN)
             startButton.text = getString(R.string.live)
+            VolleyService(signal)
         }
 
         stopButton.setOnClickListener {
@@ -128,7 +129,16 @@ class MainActivity : AppCompatActivity() {
                 startButton.setBackgroundColor(Color.BLUE)
                 startButton.text = getString(R.string.start)
             }
-            VolleyService(signal)
+        }
+
+        val cache = DiskBasedCache(cacheDir, 1024 * 1024) // 1MB cap
+
+// Set up the network to use HttpURLConnection as the HTTP client.
+        val network = BasicNetwork(HurlStack())
+
+// Instantiate the RequestQueue with the cache and network. Start the queue.
+        val requestQueue = RequestQueue(cache, network).apply {
+            start()
         }
     }
 
@@ -146,73 +156,28 @@ class MainActivity : AppCompatActivity() {
 
         // creating a new variable for our request queue
         val queue = Volley.newRequestQueue(this@MainActivity)
-
+        val json = JSONObject()
+        json.put("timestamp", signal.timestamp)
+        json.put("lat", signal.latitude.toString())
+        json.put("long", signal.longtitude.toString())
+        json.put("height", signal.altitude.toString())
+        json.put("snr", signal.snr)
+        json.put("cellid", signal.cellid)
+        json.put("ueid", signal.ueid)
         // making a string request to update our data and
         // passing method as POST. to update our data.
-        val request: StringRequest =
-            object : StringRequest(Request.Method.POST, url, object : Response.Listener<String?> {
-                override fun onResponse(response: String?) {
-                    // on below line we are displaying a toast message as data updated.
-                    Toast.makeText(this@MainActivity, "Data Updated..", Toast.LENGTH_SHORT).show()
-                    try {
-                        // on below line we are extracting data from our json object
-                        // and passing our response to our json object.
-                        val jsonObject = JSONObject(response)
-
-                        // on below line we are getting data from our response
-                        // and setting it in variables.
-                        val timeStampResp: String = jsonObject.getString("timestamp")
-                        val latDataResp: String = jsonObject.getString("lat")
-                        val longDataResp: String = jsonObject.getString("long")
-                        val altDataResp: String = jsonObject.getString("height")
-                        val snrDataResp: String = jsonObject.getString("snr")
-                        val ueIDResp: String = jsonObject.getString("ueid")
-                        val cellIDResp: String = jsonObject.getString("cellid")
-
-                        // on below line we are setting
-                        // our string to our text view.
-                        timeStampData.text = timeStampResp
-                        latData.text = latDataResp
-                        longData.text = longDataResp
-                        altData.text = altDataResp
-                        snrData.text = snrDataResp
-                        ueID.text = ueIDResp
-                        cellID.text = cellIDResp
-                    } catch (e: JSONException) {
-                        e.printStackTrace()
-                    }
-                }
-            }, object : Response.ErrorListener {
-                override fun onErrorResponse(error: VolleyError?) {
-                    // displaying toast message on response failure.
-                    Log.e("tag", "error is " + error!!.message)
-                    Toast.makeText(this@MainActivity, "Fail to update data..", Toast.LENGTH_SHORT)
-                        .show()
-                }
-            }) {
-                override fun getParams(): Map<String, String>? {
-
-                    // below line we are creating a map for storing
-                    // our values in key and value pair.
-                    val params: MutableMap<String, String> = HashMap()
-
-                    // on below line we are passing our key
-                    // and value pair to our parameters.
-                    params["timestamp"] = signal.timestamp.toString()
-                    params["lat"] = signal.latitude.toString()
-                    params["long"] = signal.longtitude.toString()
-                    params["height"] = signal.altitude.toString()
-                    params["snr"] = signal.snr.toString()
-                    params["ueid"] = signal.ueid.toString()
-                    params["cellid"] = signal.cellid.toString()
-
-                    // returning our params.
-                    return params
-                }
-            }
+        val jsonObjectRequest =
+                JsonObjectRequest(Request.Method.POST, url, json, { response ->
+                    val str = response.toString()
+                    Toast.makeText(this, str, Toast.LENGTH_SHORT)
+                    println(str)
+                }, {
+                        error ->
+                    Log.d("TAG","response: ${error.message}")
+                })
         // below line is to make
         // a json object request.
-        queue.add(request)
+        VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest)
     }
 
 }
