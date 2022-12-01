@@ -6,7 +6,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 
-class LocationApp:Application() {
+class LocationApp : Application() {
     override fun onCreate() {
         super.onCreate()
         val channel = NotificationChannel(
@@ -15,7 +15,8 @@ class LocationApp:Application() {
             "Location",
             NotificationManager.IMPORTANCE_LOW
         )
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
     }
 }

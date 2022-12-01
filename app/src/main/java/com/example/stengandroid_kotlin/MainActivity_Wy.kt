@@ -1,10 +1,13 @@
 package com.example.stengandroid_kotlin
 
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.net.ConnectivityManager
 import android.os.Build
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-
 import android.os.Handler
 import android.provider.Settings
 import android.telephony.*
@@ -13,21 +16,19 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.fragment.app.Fragment
 import com.android.volley.Request
-import com.android.volley.RequestQueue
 import com.android.volley.Response
-
-import com.android.volley.toolbox.*
-import com.example.stengandroid_kotlin.model.Signal
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
-import com.example.stengandroid_kotlin.R.*
+import com.example.stengandroid_kotlin.model.Signal
 import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import org.json.JSONException
 import org.json.JSONObject
 import java.time.LocalDateTime
@@ -35,44 +36,41 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
+class MainActivity_Wy : AppCompatActivity() {
 
-class MainActivity : AppCompatActivity() {
+    private lateinit var startButton: Button
+    private lateinit var stopButton: Button
 
-    private lateinit var startButton : Button
-    private lateinit var stopButton : Button
+    private lateinit var tv_timeStamp: TextView
+    private lateinit var tv_lat: TextView
+    private lateinit var tv_long: TextView
+    private lateinit var tv_alt: TextView
+    private lateinit var tv_snr: TextView
+    private lateinit var tv_cellID: TextView
+    private lateinit var tv_ueID: TextView
+    private lateinit var tv_accuracy: TextView
+    private lateinit var tv_tpDown: TextView
+    private lateinit var tv_tpUP: TextView
 
-    private lateinit var timeStampData : TextView
-    private lateinit var latData : TextView
-    private lateinit var longData : TextView
-    private lateinit var altData : TextView
-    private lateinit var snrData : TextView
-    private lateinit var cellID : TextView
-    private lateinit var ueID : TextView
-    private lateinit var accuracyData : TextView
-
-//    private lateinit var bottomNavigationView: BottomNavigationView
     private lateinit var locationClient: LocationClient
 
-    var locationLatitude: Double? = null
-    var locationLongitude: Double? = null
-    var locationAltitude: Double? = null
+    private var locationLatitude: Double? = null
+    private var locationLongitude: Double? = null
+    private var locationAltitude: Double? = null
 
-    var deviceId = ""
+    private var deviceId = ""
 
-    val sgDateTimePattern = "dd/MM/yyyy HH:mm z"
-    val sgDateFormatter = DateTimeFormatter.ofPattern(sgDateTimePattern)
+    private val sgDateTimePattern = "dd/MM/yyyy HH:mm z"
+    private val sgDateFormatter = DateTimeFormatter.ofPattern(sgDateTimePattern)
 
-    var telephonyManager: TelephonyManager? = null
+    private var telephonyManager: TelephonyManager? = null
 
 
-    // on below line we are creating a variable for our url.
-    // temporary mock api. to eventually change to http://18.183.118.160:3000/api/post
     private var url = "https://18.183.118.160:3000/api/post"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(layout.activity_main123)
-
+        setContentView(R.layout.activity_main_wy)
 
         telephonyManager = this.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
 
@@ -80,40 +78,86 @@ class MainActivity : AppCompatActivity() {
             applicationContext,
             LocationServices.getFusedLocationProviderClient(applicationContext)
         )
-/*        bottomNavigationView = findViewById(R.id.bottomNavigationView)
-
-        replaceFragment(HomeFragment())
-
-        bottomNavigationView.setOnItemSelectedListener {
-
-            when (it.itemId) {
-                id.Button_Home -> replaceFragment(HomeFragment())
-                id.Button_Log -> replaceFragment(LogFragment())
-                id.Button_Map -> replaceFragment(MapFragment())
-
-                else -> {}
-            }
-            true
-        }*/
         checkPermissions()
 
-        val cache = DiskBasedCache(cacheDir, 1024 * 1024) // 1MB cap
+        startButton = findViewById(R.id.button_Start)
+        stopButton = findViewById(R.id.button_Stop)
 
-// Set up the network to use HttpURLConnection as the HTTP client.
-        val network = BasicNetwork(HurlStack())
+        tv_lat = findViewById(R.id.textView_Latitude)
+        tv_long = findViewById(R.id.textView_Longitude)
+        tv_alt = findViewById(R.id.textView_Altitude)
+        tv_accuracy = findViewById(R.id.textView_Accuracy)
+        tv_timeStamp = findViewById(R.id.textView_timeStamp)
+        tv_snr = findViewById(R.id.textView_SNR)
+        tv_cellID = findViewById(R.id.textView_CELLID)
+        tv_ueID = findViewById(R.id.textView_UEID)
+        tv_tpDown = findViewById(R.id.textView_tpDown)
+        tv_tpUP = findViewById(R.id.textView_tpUp)
 
-// Instantiate the RequestQueue with the cache and network. Start the queue.
-        val requestQueue = RequestQueue(cache, network).apply {
-            start()
+        var cm =
+            applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        val nc = cm.getNetworkCapabilities(cm.activeNetwork)
+
+        val downSpeed = nc?.linkDownstreamBandwidthKbps
+
+        val upSpeed = nc?.linkUpstreamBandwidthKbps
+
+        startButton.setOnClickListener {
+            tv_ueID.text = "UEID: " + getUniqueDeviceID()
+            tv_snr.text = "dbM: " + getSignalStrength().toString()
+            getSignalVolley()
+            Intent(applicationContext, LocationService::class.java).apply {
+                action = LocationService.ACTION_START
+                startService(this)
+                locationClient.getLocationUpdates(1000L)
+                    .catch { e -> e.printStackTrace() }
+                    .onEach { location ->
+                        tv_lat.text = "Lat: " + location.latitude.toString()
+                        tv_long.text = "Long: " + location.longitude.toString()
+                        tv_alt.text = "Alt: " + location.altitude.toString().take(6)
+                        tv_accuracy.text = "Accuracy: " + location.accuracy.toString()
+                        tv_timeStamp.text = "DateTime: " + location.time.toString()
+                    }.launchIn(MainScope())
+            }
+            if (tv_lat.text != getString(R.string.latitudeNA))
+                tv_lat.setBackgroundColor(Color.GREEN)
+            if (tv_long.text != getString(R.string.longitudeNA))
+                tv_long.setBackgroundColor(Color.GREEN)
+            if (tv_alt.text != getString(R.string.altitudeNA))
+                tv_alt.setBackgroundColor(Color.GREEN)
+            if (tv_accuracy.text != getString(R.string.accuracyNA))
+                tv_accuracy.setBackgroundColor(Color.GREEN)
+            if (tv_snr.text != getString(R.string.snrNA))
+                tv_snr.setBackgroundColor(Color.GREEN)
+            if (tv_ueID.text != getString(R.string.UEIDNA))
+                tv_ueID.setBackgroundColor(Color.GREEN)
+            if (tv_cellID.text != getString(R.string.CELLIDNA))
+                tv_cellID.setBackgroundColor(Color.GREEN)
+            if (tv_tpUP.text != getString(R.string.upSpeedNA))
+                tv_tpUP.setBackgroundColor(Color.GREEN)
+            if (tv_tpDown.text != getString(R.string.downSpeedNA))
+                tv_tpDown.setBackgroundColor(Color.GREEN)
+
+            startButton.setText(R.string.live)
+            startButton.setBackgroundColor(Color.GREEN)
+            tv_tpDown.text = "Down: " + downSpeed.toString() + " Kbps"
+            tv_tpUP.text = "Up: " + upSpeed.toString() + " Kbps"
         }
-        // Retrieve Unique User Equipment ID
-        deviceId = getUniqueDeviceID().toString()
-    }
 
+        stopButton.setOnClickListener {
+            Intent(applicationContext, LocationService::class.java).apply {
+                action = LocationService.ACTION_STOP
+                startService(this)
+                startButton.setText(R.string.start)
+                startButton.setBackgroundColor(Color.BLUE)
+            }
+        }
+    }
 
     private fun checkPermissions() {
         if (ActivityCompat.checkSelfPermission(
-                this,
+                this@MainActivity_Wy,
                 android.Manifest.permission.ACCESS_FINE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED &&
             ActivityCompat.checkSelfPermission(
@@ -134,9 +178,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-    //--------------------------- Start of Handler for getting data
-
     var handler: Handler = Handler()
     var delay = 5000 // Currently, calling functions at 5 seconds interval
 
@@ -145,7 +186,7 @@ class MainActivity : AppCompatActivity() {
             createSignalObj()
             Log.v("idempotent", "i am RUNNING")
             Toast.makeText(
-                this@MainActivity, "i am RUNNING",
+                this@MainActivity_Wy, "i am RUNNING",
                 Toast.LENGTH_SHORT
             ).show()
             Log.v("idempotent", "i am POSTING")
@@ -190,10 +231,10 @@ class MainActivity : AppCompatActivity() {
         createSignalVolley(signal)
     }
 
-    //--------------------------- End of handler for getting data
+//--------------------------- End of handler for getting data
 
 
-    //--------------------------- Start of Signal Strength Retrieval
+//--------------------------- Start of Signal Strength Retrieval
 
     var sigStrTelCallback: TelephonyCallback? = null
     var sigStrPSLCallback: PhoneStateListener? = null
@@ -272,10 +313,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    //--------------------------- End of Signal Strength Retrieval
+//--------------------------- End of Signal Strength Retrieval
 
 
-    //--------------------------- Start of Device ID Retrieval
+//--------------------------- Start of Device ID Retrieval
 
     fun getUniqueDeviceID(): String? {
         var uniqueDeviceId: String? = ""
@@ -284,22 +325,22 @@ class MainActivity : AppCompatActivity() {
         return uniqueDeviceId
     }
 
-    //--------------------------- End of Device ID Retrieval
+//--------------------------- End of Device ID Retrieval
 
 
-    //--------------------------- Start of API calls handling
+//--------------------------- Start of API calls handling
 
     // on below lines we are creating a variable for our url.
-    // temporary mock api. to eventually change to
-    // post: http://18.183.118.160:3000/api/post
-    // get: http://18.183.118.160:3000/api/getAll
+// temporary mock api. to eventually change to
+// post: http://18.183.118.160:3000/api/post
+// get: http://18.183.118.160:3000/api/getAll
     var urlPost = "https://6sgje9hh91.api.quickmocker.com/api/mock/post"
     var urlGet = "https://6sgje9hh91.api.quickmocker.com/api/mock/get"
 
     private fun createSignalVolley(signal: Signal) {
         Log.v("idempotent", "post 1")
         // creating a new variable for our request queue
-        val queue = Volley.newRequestQueue(this@MainActivity)
+        val queue = Volley.newRequestQueue(this@MainActivity_Wy)
 /*leon's code
         val json = JSONObject()
         json.put("timestamp", signal.timestamp)
@@ -333,14 +374,14 @@ class MainActivity : AppCompatActivity() {
                         Log.v("idempotent", "post 3")
                         // on below line we are displaying a toast message as data updated.
 
-                        Toast.makeText(this@MainActivity, "Storing Data..", Toast.LENGTH_SHORT)
+                        Toast.makeText(this@MainActivity_Wy, "Storing Data..", Toast.LENGTH_SHORT)
                             .show()
                     }
                 },
                 Response.ErrorListener { error -> // displaying toast message on response failure.
                     Log.e("tag", "error is " + error!!.message)
                     Toast.makeText(
-                        this@MainActivity,
+                        this,
                         "Failed to store data",
                         Toast.LENGTH_SHORT
                     )
@@ -380,14 +421,14 @@ class MainActivity : AppCompatActivity() {
     private fun getSignalsVolley() {
         // on below line we are creating a variable for our
         // request queue and initializing it.
-        val queue = Volley.newRequestQueue(this@MainActivity)
+        val queue = Volley.newRequestQueue(this)
 
         // on below line we are creating a variable for request
         // and initializing it with json object request
         val request =
             JsonArrayRequest(Request.Method.GET, urlGet, null, { response ->
                 // on below line we are displaying a toast message as data is retrieved.
-                Toast.makeText(this@MainActivity, "Data Updated..", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Data Updated..", Toast.LENGTH_SHORT).show()
                 try {
                     for (i in 0 until response.length()) {
                         val responseObject = response.getJSONObject(i)
@@ -409,7 +450,7 @@ class MainActivity : AppCompatActivity() {
             }, { error ->
                 // displaying toast message on response failure.
                 Log.e("tag", "error is " + error!!.message)
-                Toast.makeText(this@MainActivity, "Failed to get response", Toast.LENGTH_SHORT)
+                Toast.makeText(this, "Failed to get response", Toast.LENGTH_SHORT)
                     .show()
             })
         queue.add(request)
@@ -421,14 +462,14 @@ class MainActivity : AppCompatActivity() {
 
         // on below line we are creating a variable for our
         // request queue and initializing it.
-        val queue = Volley.newRequestQueue(this@MainActivity)
+        val queue = Volley.newRequestQueue(this)
 
         // on below line we are creating a variable for request
         // and initializing it with json object request
         val request =
             JsonObjectRequest(Request.Method.GET, urlGet, null, { response ->
                 // on below line we are displaying a toast message as data is retrieved.
-                Toast.makeText(this@MainActivity, "Data Updated", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Data Updated", Toast.LENGTH_SHORT).show()
                 try {
                     // on below line we are getting data from our response
                     // and setting it in variables.
@@ -444,7 +485,7 @@ class MainActivity : AppCompatActivity() {
             }, { error ->
                 // displaying toast message on response failure.
                 Log.e("tag", "error is " + error!!.message)
-                Toast.makeText(this@MainActivity, "Failed to get response", Toast.LENGTH_SHORT)
+                Toast.makeText(this, "Failed to get response", Toast.LENGTH_SHORT)
                     .show()
             })
         queue.add(request)
@@ -471,27 +512,5 @@ class MainActivity : AppCompatActivity() {
             ueIDResp,
             cellIDResp
         )
-    }
-
-    // To display data of Signal properties on layout view
-    //leon's code?
-//    private fun setJsonResponseStringToView(signal: Signal){
-//        timeStampData.text = signal.timestamp.toString()
-//        latData.text = signal.latitude.toString()
-//        longData.text = signal.longitude.toString()
-//        altData.text = signal.altitude.toString()
-//        snrData.text = signal.snr.toString()
-//        ueID.text = signal.ueid.toString()
-//        cellID.text = signal.cellid.toString()
-//    }
-
-    //--------------------------- End of API calls handling
-
-    private fun replaceFragment(fragment: Fragment) {
-
-        val fragmentManager = supportFragmentManager
-        val fragmentTransaction = fragmentManager.beginTransaction()
-        fragmentTransaction.replace(id.frame_layout, fragment)
-        fragmentTransaction.commit()
     }
 }

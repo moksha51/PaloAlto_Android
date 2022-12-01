@@ -7,13 +7,15 @@
     <string name="stop">Stop</string>
     <string name="live">Live</string>
 
-    <string name="latitudeNA">Latitude:NA</string>
-    <string name="longitudeNA">Longitude:NA</string>
-    <string name="altitudeNA">Altitude:NA</string>
-    <string name="snrNA">SNR:NA</string>
-    <string name="UEIDNA">UEID:NA</string>
-    <string name="CELLIDNA">CELLID:NA</string>
-    <string name="accuracyNA">Accuracy:NA</string>
+    <string name="latitudeNA">Latitude: NA</string>
+    <string name="longitudeNA">Longitude: NA</string>
+    <string name="altitudeNA">Altitude: NA</string>
+    <string name="snrNA">SNR: NA</string>
+    <string name="UEIDNA">UEID: NA</string>
+    <string name="CELLIDNA">CELLID: NA</string>
+    <string name="accuracyNA">Accuracy: NA</string>
+    <string name="downSpeedNA">DownSpeed: NA</string>
+    <string name="upSpeedNA">UpSpeed: NA</string>
     <string name="timer">HH:MM:SS</string>
     <string name="currentDateTime">HH:MM:SS</string>
 
