@@ -35,6 +35,8 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.util.*
+import kotlin.collections.HashMap
 
 class MainActivity_Wy : AppCompatActivity() {
 
@@ -62,6 +64,7 @@ class MainActivity_Wy : AppCompatActivity() {
 
     private val sgDateTimePattern = "dd/MM/yyyy HH:mm z"
     private val sgDateFormatter = DateTimeFormatter.ofPattern(sgDateTimePattern)
+    private val simpleDateFormatter = java.text.SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault())
 
     private var telephonyManager: TelephonyManager? = null
 
@@ -103,6 +106,8 @@ class MainActivity_Wy : AppCompatActivity() {
 
         val upSpeed = nc?.linkUpstreamBandwidthKbps
 
+        getSignalStrength()
+
         startButton.setOnClickListener {
             tv_ueID.text = "UEID: " + getUniqueDeviceID()
             tv_snr.text = "dbM: " + getSignalStrength().toString()
@@ -117,9 +122,13 @@ class MainActivity_Wy : AppCompatActivity() {
                         tv_long.text = "Long: " + location.longitude.toString()
                         tv_alt.text = "Alt: " + location.altitude.toString().take(6)
                         tv_accuracy.text = "Accuracy: " + location.accuracy.toString()
-                        tv_timeStamp.text = "DateTime: " + location.time.toString()
+
+                        val dateFormatted = Date(location.time)
+                        val dateToText = simpleDateFormatter.format(dateFormatted)
+                        tv_timeStamp.text = "DateTime: " + dateToText
                     }.launchIn(MainScope())
             }
+
             if (tv_lat.text != getString(R.string.latitudeNA))
                 tv_lat.setBackgroundColor(Color.GREEN)
             if (tv_long.text != getString(R.string.longitudeNA))
