@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.json.JSONException
 import org.json.JSONObject
+import org.w3c.dom.Text
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -103,7 +104,10 @@ class MainActivity_Wy : AppCompatActivity() {
 
         val upSpeed = nc?.linkUpstreamBandwidthKbps
 
+        NukeSSLCerts.nuke()
+
         startButton.setOnClickListener {
+            startHandler()
             tv_ueID.text = "UEID: " + getUniqueDeviceID()
             tv_snr.text = "dbM: " + getSignalStrength().toString()
             getSignalVolley()
@@ -120,6 +124,9 @@ class MainActivity_Wy : AppCompatActivity() {
                         tv_timeStamp.text = "DateTime: " + location.time.toString()
                     }.launchIn(MainScope())
             }
+
+            textViewChangeColor()
+
             if (tv_lat.text != getString(R.string.latitudeNA))
                 tv_lat.setBackgroundColor(Color.GREEN)
             if (tv_long.text != getString(R.string.longitudeNA))
@@ -151,6 +158,7 @@ class MainActivity_Wy : AppCompatActivity() {
                 startService(this)
                 startButton.setText(R.string.start)
                 startButton.setBackgroundColor(Color.BLUE)
+                stopHandler()
             }
         }
     }
@@ -341,11 +349,10 @@ class MainActivity_Wy : AppCompatActivity() {
         Log.v("idempotent", "post 1")
         // creating a new variable for our request queue
         val queue = Volley.newRequestQueue(this@MainActivity_Wy)
-/*leon's code
         val json = JSONObject()
         json.put("timestamp", signal.timestamp)
         json.put("lat", signal.latitude.toString())
-        json.put("long", signal.longtitude.toString())
+        json.put("long", signal.longitude.toString())
         json.put("height", signal.altitude.toString())
         json.put("snr", signal.snr)
         json.put("cellid", signal.cellid)
@@ -361,7 +368,6 @@ class MainActivity_Wy : AppCompatActivity() {
                         error ->
                     Log.d("TAG","response: ${error.message}")
                 })
-*/
         Log.v("idempotent", "post 2")
         // making a string request to update our data and
         // passing method as POST. to update our data.
@@ -511,6 +517,36 @@ class MainActivity_Wy : AppCompatActivity() {
             snrDataResp,
             ueIDResp,
             cellIDResp
+        )
+    }
+
+    private fun textViewSetUp() {
+        val textViewArray = arrayOf(
+            R.id.textView_Latitude,
+            R.id.textView_Longitude,
+            R.id.textView_Altitude,
+            R.id.textView_Accuracy,
+            R.id.textView_timeStamp,
+            R.id.textView_SNR,
+            R.id.textView_CELLID,
+            R.id.textView_UEID,
+            R.id.textView_tpUp,
+            R.id.textView_tpDown
+        )
+    }
+
+    private fun textViewChangeColor() {
+
+        var textViewNA = arrayOf(
+            R.string.latitudeNA,
+            R.string.longitudeNA,
+            R.string.altitudeNA,
+            R.string.accuracyNA,
+            R.string.snrNA,
+            R.string.CELLIDNA,
+            R.string.UEIDNA,
+            R.string.upSpeedNA,
+            R.string.downSpeedNA
         )
     }
 }
