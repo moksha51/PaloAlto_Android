@@ -7,26 +7,29 @@
     <string name="stop">Stop</string>
     <string name="live">Live</string>
 
-    <string name="latitudeNA">Latitude: NA</string>
-    <string name="longitudeNA">Longitude: NA</string>
-    <string name="altitudeNA">Altitude: NA</string>
-    <string name="snrNA">SNR: NA</string>
-    <string name="UEIDNA">UEID: NA</string>
-    <string name="CELLIDNA">CELLID: NA</string>
-    <string name="accuracyNA">Accuracy: NA</string>
-    <string name="downSpeedNA">DownSpeed: NA</string>
-    <string name="upSpeedNA">UpSpeed: NA</string>
-    <string name="timer">HH:MM:SS</string>
-    <string name="currentDateTime">HH:MM:SS</string>
+
 
     <string name="longitude">Longitude: </string>
     <string name="latitude">Latitude: </string>
     <string name="altitude">Altitude: </string>
-    <string name="snr">SNR: </string>
-    <string name="UEID">UEID: </string>
-    <string name="CELLID">CELLID: </string>
     <string name="accuracy">Accuracy: </string>
+    <string name="snr">SNR: </string>
+    <string name="ueId">UEID: </string>
+    <string name="cellId">CELLID: </string>
+    <string name="downSpeed">DownSpeed: </string>
+    <string name="upSpeed">UpSpeed: </string>
+    <string name="timer">HH:MM:SS</string>
+    <string name="currentDateTime">DD-MM-YYYY HH:MM:SS</string>
+    <string name="Kbps">Kbps</string>
+    <string name="dBm">dBm: </string>
     <string name="large_text">
+
+        <string-array name="Time Intervals">
+            <item>1 sec</item>
+            <item>5 Sec</item>
+            <item>10 Sec</item>
+        </string-array>
+
         "Material is the metaphor.\n\n"
 
         "A material metaphor is the unifying theory of a rationalized space and a system of motion."

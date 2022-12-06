@@ -47,7 +47,7 @@ package com.example.stengandroid_kotlin
 //    private lateinit var altData : TextView
 //    private lateinit var snrData : TextView
 //    private lateinit var cellID : TextView
-//    private lateinit var ueID : TextView
+//    private lateinit var ueId : TextView
 //    private lateinit var accuracyData : TextView
 //
 ////    private lateinit var bottomNavigationView: BottomNavigationView
@@ -481,7 +481,7 @@ package com.example.stengandroid_kotlin
 ////        longData.text = signal.longitude.toString()
 ////        altData.text = signal.altitude.toString()
 ////        snrData.text = signal.snr.toString()
-////        ueID.text = signal.ueid.toString()
+////        ueId.text = signal.ueid.toString()
 ////        cellID.text = signal.cellid.toString()
 ////    }
 //
