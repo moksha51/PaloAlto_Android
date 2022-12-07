@@ -1,32 +1,40 @@
 package com.example.stengandroid_kotlin.model
 
-import java.time.LocalDateTime
-
 class Signal {
 
-    var timestamp:LocalDateTime? = null
-    var latitude:Double? = null //need to change data type?
-    var longitude:Double? = null //need to change data type?
-    var altitude:Double? = null //need to change data type?
-    var snr:String? = null
-    var ueid:String? = null
-    var cellid:String? = null
+    var dateTime: String? = null
+    var latitude: String? = null //need to change data type?
+    var longitude: String? = null //need to change data type?
+    var altitude: String? = null //need to change data type?
+    var accuracy: String? = null
+    var signalStrength: String? = null
+    var ueId: String? = null
+    var cellId: String? = null
+    var upSpeed: String? = null
+    var downSpeed: String? = null
 
     constructor(
-        timestamp: LocalDateTime?,
-        latitude: Double?,
-        longitude: Double?,
-        altitude: Double?,
-        snr: String?,
-        ueid: String?,
-        cellid: String?
+        dateTime: String?,
+        latitude: String?,
+        longitude: String?,
+        altitude: String?,
+        accuracy: String?,
+        signalStrength: String?,
+        ueId: String?,
+        cellId: String?,
+        upSpeed: String?,
+        downSpeed: String?
     ) {
-        this.timestamp = timestamp
+        this.dateTime = dateTime
         this.latitude = latitude
         this.longitude = longitude
         this.altitude = altitude
-        this.snr = snr
-        this.ueid = ueid
-        this.cellid = cellid
+        this.accuracy = accuracy
+        this.signalStrength = signalStrength
+        this.ueId = ueId
+        this.cellId = cellId
+        this.upSpeed = upSpeed
+        this.downSpeed = downSpeed
     }
+
 }
