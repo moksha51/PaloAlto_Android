@@ -25,6 +25,7 @@ import com.example.stengandroid_kotlin.R.*
 import com.example.stengandroid_kotlin.model.Signal
 import com.example.stengandroid_kotlin.model.VolleySingleton
 import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
@@ -97,6 +98,8 @@ class MainActivity_Wy : AppCompatActivity() {
             applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val nc = cm.getNetworkCapabilities(cm.activeNetwork)
 
+        var locationBackgroundJob: Job? = null
+
         telephonyManager = this.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
 
         locationClient = DefaultLocationClient(
@@ -135,7 +138,7 @@ class MainActivity_Wy : AppCompatActivity() {
             Intent(applicationContext, LocationService::class.java).apply {
                 action = LocationService.ACTION_START
                 startService(this)
-                locationClient.getLocationUpdates(1000L)
+                locationBackgroundJob = locationClient.getLocationUpdates(10000L)
                     .catch { e -> e.printStackTrace() }
                     .onEach { location ->
                         tv_lat.text = string.latitude.toString() + location.latitude.toString()
@@ -184,6 +187,9 @@ class MainActivity_Wy : AppCompatActivity() {
             Intent(applicationContext, LocationService::class.java).apply {
                 action = LocationService.ACTION_STOP
                 startService(this)
+                locationBackgroundJob?.cancel()
+                Log.v("idempotent", "is location backgrd job cancelled? " + locationBackgroundJob?.isCancelled.toString())
+                stopListeners()
                 startButton.setText(string.start)
                 startButton.setBackgroundColor(Color.BLUE)
                 //stopHandler()
@@ -191,15 +197,17 @@ class MainActivity_Wy : AppCompatActivity() {
         }
     }
 
+    val MULTIPLE_PERMISSONS = 100
+
     private fun checkPermissions() {
         if (ActivityCompat.checkSelfPermission(
                 this@MainActivity_Wy,
                 android.Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED &&
+            ) != PackageManager.PERMISSION_GRANTED ||
             ActivityCompat.checkSelfPermission(
                 this,
                 android.Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED &&
+            ) != PackageManager.PERMISSION_GRANTED ||
             ActivityCompat.checkSelfPermission(
                 this,
                 android.Manifest.permission.INTERNET
@@ -207,10 +215,10 @@ class MainActivity_Wy : AppCompatActivity() {
         ) {
             ActivityCompat.requestPermissions(
                 this,
-                arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),
-                100
+                arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.INTERNET),
+                MULTIPLE_PERMISSONS
             )
-            return
+//            return
         }
     }
 
@@ -390,7 +398,7 @@ class MainActivity_Wy : AppCompatActivity() {
             }, { error ->
                 Log.d("TAG", "response: ${error.message}")
             })
-        queue.add(jsonObjectRequest)
+//        queue.add(jsonObjectRequest)
         Log.v("idempotent", "post 2")
 //        // making a string request to update our data and
 //        // passing method as POST. to update our data.
