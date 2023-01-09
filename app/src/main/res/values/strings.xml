@@ -4,9 +4,10 @@
     <string name="reset">Reset</string>
     <string name="pause">Pause</string>
     <string name="start">Start</string>
+    <string name="save">Save</string>
     <string name="stop">Stop</string>
     <string name="live">Live</string>
-
+    <string name="Interval">Interval: </string>
 
 
     <string name="longitude">Longitude: </string>
@@ -18,7 +19,7 @@
     <string name="cellId">CELLID: </string>
     <string name="downSpeed">DownSpeed: </string>
     <string name="upSpeed">UpSpeed: </string>
-    <string name="timer">HH:MM:SS</string>
+    <string name="timer">Time Elapsed: </string>
     <string name="currentDateTime">DD-MM-YYYY HH:MM:SS</string>
     <string name="Kbps">Kbps</string>
     <string name="dBm">dBm: </string>

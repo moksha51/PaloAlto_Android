@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity_Wy">
+    tools:context=".MainActivity">
 
     <TextView
         android:id="@+id/textView_Latitude"
@@ -125,15 +125,27 @@
         android:text="@string/upSpeed"
         app:layout_constraintHorizontal_weight="1"
         app:layout_constraintLeft_toRightOf="@id/textView_downSpeed"
-        app:layout_constraintRight_toLeftOf="@id/editText_interval"
+        app:layout_constraintRight_toLeftOf="@id/textView_interval"
         app:layout_constraintTop_toBottomOf="@id/textView_timeStamp" />
+
+    <TextView
+        android:id="@+id/textView_interval"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="15dp"
+        android:text="Interval:"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintLeft_toRightOf="@id/textView_upSpeed"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textView_timer" />
 
     <EditText
         android:id="@+id/editText_interval"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="15dp"
-        android:text="Interval:"
+        android:text=""
+        android:visibility="invisible"
         app:layout_constraintHorizontal_weight="1"
         app:layout_constraintLeft_toRightOf="@id/textView_upSpeed"
         app:layout_constraintRight_toRightOf="parent"
@@ -158,6 +170,27 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/button_Start" />
+
+    <Button
+        android:id="@+id/button_EditInterval"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="80dp"
+        android:text="Edit Interval "
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button_Stop" />
+
+    <Button
+        android:id="@+id/button_SaveInterval"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="80dp"
+        android:text="@string/save"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button_Stop" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 
