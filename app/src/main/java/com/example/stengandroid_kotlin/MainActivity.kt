@@ -145,6 +145,7 @@ class MainActivity : AppCompatActivity() {
             tv_timer.text = getString(string.timer)
             tv_ueID.text = getString(string.ueId) + getUniqueDeviceID()
             settingDeviceId = getUniqueDeviceID()
+
             tv_cellID.text = getString(string.cellId) + getCellID().toString()
             tv_snr.text = getString(string.snr) + getSignalStrength().toString()
             tv_upSpeed.text = upSpeed + getString(string.Kbps)
@@ -174,6 +175,8 @@ class MainActivity : AppCompatActivity() {
                         signalSnr = getSignalStrength().toString()
                         tv_downSpeed.text = getString(string.downSpeed) + nc?.linkDownstreamBandwidthKbps.toString() + getString(string.Kbps)
                         tv_upSpeed.text = getString(string.upSpeed) + nc?.linkUpstreamBandwidthKbps.toString() + getString(string.Kbps)
+                        cellId = getCellID().toString()
+                        tv_cellID.text = cellId
                         createSignalObj()
                     }.launchIn(MainScope())
             }
