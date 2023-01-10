@@ -10,19 +10,20 @@
     <string name="Interval">Interval: </string>
 
 
-    <string name="longitude">Longitude: </string>
-    <string name="latitude">Latitude: </string>
-    <string name="altitude">Altitude: </string>
-    <string name="accuracy">Accuracy: </string>
-    <string name="snr">SNR: </string>
-    <string name="ueId">UEID: </string>
-    <string name="cellId">CELLID: </string>
-    <string name="downSpeed">DownSpeed: </string>
-    <string name="upSpeed">UpSpeed: </string>
-    <string name="timer">Time Elapsed: </string>
-    <string name="currentDateTime">DD-MM-YYYY HH:MM:SS</string>
-    <string name="Kbps">Kbps</string>
+    <string name="longitude"> Longitude: </string>
+    <string name="latitude"> Latitude: </string>
+    <string name="altitude"> Altitude: </string>
+    <string name="accuracy"> Accuracy: </string>
+    <string name="snr"> SNR: </string>
+    <string name="ueId"> UEID: </string>
+    <string name="cellId"> CELLID: </string>
+    <string name="downSpeed"> DownSpeed: </string>
+    <string name="upSpeed"> UpSpeed: </string>
+    <string name="timer"> Time Elapsed: </string>
+    <string name="timeStamp"> TimeStamp: </string>
+    <string name="Kbps"> Kbps</string>
     <string name="dBm">dBm: </string>
+    <string name="ms"> ms</string>
     <string name="large_text">
 
         <string-array name="Time Intervals">

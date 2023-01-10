@@ -2,7 +2,6 @@ package com.example.stengandroid_kotlin
 
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.ConnectivityManager
@@ -25,6 +24,7 @@ import androidx.core.app.ActivityCompat
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.example.stengandroid_kotlin.R.*
+import com.example.stengandroid_kotlin.R.color.*
 import com.example.stengandroid_kotlin.model.Signal
 import com.example.stengandroid_kotlin.model.VolleySingleton
 import com.google.android.gms.location.LocationServices
@@ -36,6 +36,7 @@ import kotlinx.coroutines.flow.onEach
 import org.json.JSONObject
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.concurrent.timerTask
 
 class MainActivity : AppCompatActivity() {
 
@@ -64,7 +65,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var signal: Signal
 
     private val mInterval = 1
-    private var mHandler: Handler? = null
+    private var handler: Handler? = null
     private var timeInSeconds = 0L
     private var startButtonClicked = false
 
@@ -94,7 +95,7 @@ class MainActivity : AppCompatActivity() {
 
         checkPermissions()
 
-        var cm =
+        val cm =
             applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val nc = cm.getNetworkCapabilities(cm.activeNetwork)
 
@@ -129,7 +130,7 @@ class MainActivity : AppCompatActivity() {
         tv_timer = findViewById(id.textView_timer)
         tv_interval.text =
             getString(string.Interval) + sharedPreferences.getLong("interval", interval!!)
-                .toString() + "ms"
+                .toString() + getString(string.ms)
         et_interval = findViewById(id.editText_interval)
 
         NukeSSLCerts.nuke()
@@ -138,18 +139,19 @@ class MainActivity : AppCompatActivity() {
         downSpeed = nc?.linkDownstreamBandwidthKbps.toString()
         upSpeed = nc?.linkUpstreamBandwidthKbps.toString()
 
+
         startButton.setOnClickListener {
             startTimer()
-            tv_timer.text = getString(string.timer) + startTimer()
+            tv_timer.text = getString(string.timer)
             tv_ueID.text = getString(string.ueId) + getUniqueDeviceID()
             settingDeviceId = getUniqueDeviceID()
             tv_cellID.text = getString(string.cellId) + getCellID().toString()
             tv_snr.text = getString(string.snr) + getSignalStrength().toString()
             tv_upSpeed.text = upSpeed + getString(string.Kbps)
             tv_downSpeed.text = downSpeed + getString(string.Kbps)
+            interval = sharedPreferences.getLong("interval", interval)
             tv_interval.text =
-                getString(string.Interval) + sharedPreferences.getLong("interval", interval!!)
-                    .toString() + "ms"
+                getString(string.Interval) + interval.toString() + getString(string.ms)
             Intent(applicationContext, LocationService::class.java).apply {
                 action = LocationService.ACTION_START
                 startService(this)
@@ -167,18 +169,16 @@ class MainActivity : AppCompatActivity() {
                         locationAccuracy = location.accuracy.toString()
                         val dateFormatted = Date(location.time)
                         val dateToText = simpleDateFormatter.format(dateFormatted)
-                        tv_dateTime.text = dateToText
+                        tv_dateTime.text = getString(string.timeStamp) + dateToText
                         locationDateTime = dateToText.toString()
                         signalSnr = getSignalStrength().toString()
-                        downSpeed = nc?.linkDownstreamBandwidthKbps.toString()
-                        upSpeed = nc?.linkUpstreamBandwidthKbps.toString()
+                        tv_downSpeed.text = getString(string.downSpeed) + nc?.linkDownstreamBandwidthKbps.toString() + getString(string.Kbps)
+                        tv_upSpeed.text = getString(string.upSpeed) + nc?.linkUpstreamBandwidthKbps.toString() + getString(string.Kbps)
                         createSignalObj()
                     }.launchIn(MainScope())
             }
             startButton.setText(string.live)
             startButton.setBackgroundColor(Color.GREEN)
-            tv_downSpeed.text = getString(string.downSpeed) + downSpeed + getString(string.Kbps)
-            tv_upSpeed.text = getString(string.upSpeed) + upSpeed + getString(string.Kbps)
         }
 
         stopButton.setOnClickListener {
@@ -190,10 +190,9 @@ class MainActivity : AppCompatActivity() {
                 locationBackgroundJob?.cancel()
                 stopListeners()
                 startButton.text = getString(string.start)
-                startButton.setBackgroundColor(Color.BLUE)
+                startButton.setBackgroundColor(resources.getColor(purple_200))
             }
         }
-
         editIntervalButton.setOnClickListener {
             editIntervalButton.visibility = View.INVISIBLE
             saveIntervalButton.visibility = View.VISIBLE
@@ -206,17 +205,17 @@ class MainActivity : AppCompatActivity() {
             et_interval.visibility = View.INVISIBLE
             editIntervalButton.visibility = View.VISIBLE
             saveIntervalButton.visibility = View.INVISIBLE
-            var interval = et_interval.text.toString().toLongOrNull()
+            val interval = et_interval.text.toString().toLongOrNull()
             if (interval != null) {
                 editor.putLong("interval", interval)
                 editor.apply()
                 Toast.makeText(this, "New interval duation is: $interval", Toast.LENGTH_SHORT)
                     .show()
-                tv_interval.text = getString(string.Interval) + interval.toString() + "ms"
+                tv_interval.text =
+                    getString(string.Interval) + interval.toString() + getString(string.ms)
             }
         }
     }
-
 
     private fun checkPermissions() {
         if (ActivityCompat.checkSelfPermission(
@@ -264,7 +263,7 @@ class MainActivity : AppCompatActivity() {
             upSpeed,
             downSpeed
         )
-        createSignalVolley(signal)
+        createSignalVolley(signal, interval)
         Toast.makeText(this, locationDateTime.toString(), Toast.LENGTH_SHORT).show()
     }
 
@@ -320,10 +319,8 @@ class MainActivity : AppCompatActivity() {
         for (sig in listSig) {
             if (sig is CellSignalStrengthNr) {
                 sigStr = sig.dbm
-                Log.v("idempotent", "Nr found " + sig.dbm)
             } else {
                 sigStr = sig.dbm
-                Log.v("idempotent", "Other sig found " + sig.dbm)
             }
         }
     }
@@ -334,7 +331,6 @@ class MainActivity : AppCompatActivity() {
                 telephonyManager?.unregisterTelephonyCallback(it)
             }
         } else {
-            Log.v("idempotent", "old stuff")
             sigStrPSLCallback?.let {
                 telephonyManager?.listen(
                     sigStrPSLCallback,
@@ -346,7 +342,8 @@ class MainActivity : AppCompatActivity() {
 
 //--------------------------- End of Signal Strength Retrieval
 
-    //--------------------------- Start of Device ID Retrieval
+
+//--------------------------- Start of Device ID Retrieval
     fun getUniqueDeviceID(): String? {
         val text = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
         return text
@@ -360,24 +357,27 @@ class MainActivity : AppCompatActivity() {
 
 //--------------------------- Start of API calls handling
 
-    private fun createSignalVolley(signal: Signal) {
-        val json = JSONObject()
-        json.put("timestamp", signal.dateTime)
-        json.put("lat", signal.latitude)
-        json.put("long", signal.longitude)
-        json.put("snr", signal.signalStrength)
-        json.put("height", signal.altitude)
-        json.put("ueid", signal.ueId)
-        json.put("cellid", signal.cellId)
+    private fun createSignalVolley(signal: Signal, interval: Long) {
+        Timer().schedule(timerTask {
+            val json = JSONObject()
+            json.put("timestamp", signal.dateTime)
+            json.put("lat", signal.latitude)
+            json.put("long", signal.longitude)
+            json.put("snr", signal.signalStrength)
+            json.put("height", signal.altitude)
+            json.put("ueid", signal.ueId)
+            json.put("cellid", signal.cellId)
 
-        val jsonObjectRequest =
-            JsonObjectRequest(Request.Method.POST, postUrl, json, { response ->
-                val str = response.toString()
-                Toast.makeText(this@MainActivity, str, Toast.LENGTH_SHORT).show()
-            }, { error ->
-                Log.d("TAG", "response: ${error.message}")
-            })
-        VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest)
+            val jsonObjectRequest =
+                JsonObjectRequest(Request.Method.POST, postUrl, json, { response ->
+                    val str = response.toString()
+                    Toast.makeText(this@MainActivity, str, Toast.LENGTH_SHORT).show()
+                }, { error ->
+                    Log.d("TAG", "response: ${error.message}")
+                })
+            VolleySingleton.getInstance(this@MainActivity).addToRequestQueue(jsonObjectRequest)
+        }, interval)
+
     }
 
     private fun resetTimerView() {
@@ -386,13 +386,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startTimer() {
-        mHandler = Handler(Looper.getMainLooper())
+        handler = Handler(Looper.getMainLooper())
         mStatusChecker.run()
         startButtonClicked = true
     }
 
     private fun stopTimer() {
-        mHandler?.removeCallbacks(mStatusChecker)
+        handler?.removeCallbacks(mStatusChecker)
         startButtonClicked = false
     }
 
@@ -400,12 +400,11 @@ class MainActivity : AppCompatActivity() {
         override fun run() {
             try {
                 timeInSeconds += 1
-                Log.e("timeInSeconds", timeInSeconds.toString())
                 updateStopWatchView(timeInSeconds)
             } finally {
                 // 100% guarantee that this always happens, even if
                 // your update method throws an exception
-                mHandler!!.postDelayed(this, mInterval.toLong())
+                handler!!.postDelayed(this, mInterval.toLong())
             }
         }
     }
