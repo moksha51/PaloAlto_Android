@@ -136,18 +136,18 @@ class MainActivity : AppCompatActivity() {
         NukeSSLCerts.nuke()
         getSignalStrength()
 
+        tv_timer.text = getString(string.timer)
+        tv_ueID.text = getString(string.ueId) + getUniqueDeviceID()
+        settingDeviceId = getUniqueDeviceID()
+
         downSpeed = nc?.linkDownstreamBandwidthKbps.toString()
         upSpeed = nc?.linkUpstreamBandwidthKbps.toString()
 
 
         startButton.setOnClickListener {
             startTimer()
-            tv_timer.text = getString(string.timer)
-            tv_ueID.text = getString(string.ueId) + getUniqueDeviceID()
-            settingDeviceId = getUniqueDeviceID()
-
             tv_cellID.text = getString(string.cellId) + getCellID().toString()
-            tv_snr.text = getString(string.snr) + getSignalStrength().toString()
+            tv_snr.text = getString(string.snr) + getSignalStrength().toString() + " " + sigType.toString()
             tv_upSpeed.text = upSpeed + getString(string.Kbps)
             tv_downSpeed.text = downSpeed + getString(string.Kbps)
             interval = sharedPreferences.getLong("interval", interval)
@@ -170,8 +170,9 @@ class MainActivity : AppCompatActivity() {
                         locationAccuracy = location.accuracy.toString()
                         val dateFormatted = Date(location.time)
                         val dateToText = simpleDateFormatter.format(dateFormatted)
-                        tv_dateTime.text = getString(string.timeStamp) + dateToText
+                        tv_dateTime.text = dateToText
                         locationDateTime = dateToText.toString()
+                        tv_snr.text = getString(string.snr) + getSignalStrength().toString() + " " + sigType.toString()
                         signalSnr = getSignalStrength().toString()
                         tv_downSpeed.text = getString(string.downSpeed) + nc?.linkDownstreamBandwidthKbps.toString() + getString(string.Kbps)
                         tv_upSpeed.text = getString(string.upSpeed) + nc?.linkUpstreamBandwidthKbps.toString() + getString(string.Kbps)
@@ -275,6 +276,7 @@ class MainActivity : AppCompatActivity() {
     var sigStrTelCallback: TelephonyCallback? = null
     var sigStrPSLCallback: PhoneStateListener? = null
     var sigStr: Int? = null
+    var sigType: String? = null
 
     private fun getSignalStrength(): Int? {
         stopListeners()
@@ -320,10 +322,11 @@ class MainActivity : AppCompatActivity() {
     fun processSignalStrengthData(signalStrength: SignalStrength) {
         var listSig: List<CellSignalStrength> = signalStrength.cellSignalStrengths
         for (sig in listSig) {
+            sigStr = sig.dbm
             if (sig is CellSignalStrengthNr) {
-                sigStr = sig.dbm
+                sigType = "5G"
             } else {
-                sigStr = sig.dbm
+                sigType = "Not 5G"
             }
         }
     }
@@ -414,7 +417,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateStopWatchView(timeInSeconds: Long) {
         val formattedTime = getFormattedStopWatch((timeInSeconds * 1000))
-        tv_timer.text = formattedTime
+        tv_timer.text = getString(string.timer)+formattedTime
     }
 
     private fun getFormattedStopWatch(ms: Long): String {
