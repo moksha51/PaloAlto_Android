@@ -213,7 +213,7 @@ class MainActivity : AppCompatActivity() {
             if (interval != null) {
                 editor.putLong("interval", interval)
                 editor.apply()
-                Toast.makeText(this, "New interval duation is: $interval", Toast.LENGTH_SHORT)
+                Toast.makeText(this, "New interval duration is: $interval", Toast.LENGTH_SHORT)
                     .show()
                 tv_interval.text =
                     getString(string.Interval) + interval.toString() + getString(string.ms)
@@ -268,7 +268,6 @@ class MainActivity : AppCompatActivity() {
             downSpeed
         )
         createSignalVolley(signal, interval)
-        Toast.makeText(this, locationDateTime.toString(), Toast.LENGTH_SHORT).show()
     }
 
 //--------------------------- Start of Signal Strength Retrieval
@@ -376,10 +375,10 @@ class MainActivity : AppCompatActivity() {
 
             val jsonObjectRequest =
                 JsonObjectRequest(Request.Method.POST, postUrl, json, { response ->
-                    val str = response.toString()
-                    Toast.makeText(this@MainActivity, str, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity, "Post Successful", Toast.LENGTH_SHORT).show()
                 }, { error ->
                     Log.d("TAG", "response: ${error.message}")
+                    Toast.makeText(this@MainActivity, "Post Failed: ${error.message}" , Toast.LENGTH_SHORT).show()
                 })
             VolleySingleton.getInstance(this@MainActivity).addToRequestQueue(jsonObjectRequest)
         }, interval)
