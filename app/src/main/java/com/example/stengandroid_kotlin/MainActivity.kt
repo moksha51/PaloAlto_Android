@@ -159,24 +159,25 @@ class MainActivity : AppCompatActivity() {
                 locationBackgroundJob = locationClient.getLocationUpdates(interval)
                     .catch { e -> e.printStackTrace() }
                     .onEach { location ->
-                        tv_lat.text = getString(string.latitude) + location.latitude.toString()
                         locationLatitude = location.latitude.toString()
-                        tv_long.text = getString(string.longitude) + location.longitude.toString()
+                        tv_lat.text = getString(string.latitude) + location.latitude.toString()
                         locationLongitude = location.longitude.toString()
+                        tv_long.text = getString(string.longitude) + location.longitude.toString()
+                        locationAltitude = location.altitude.toString()
                         tv_alt.text =
                             getString(string.altitude) + location.altitude.toString().take(6)
-                        locationAltitude = location.altitude.toString()
-                        tv_accuracy.text = getString(string.accuracy) + location.accuracy.toString()
                         locationAccuracy = location.accuracy.toString()
+                        tv_accuracy.text = getString(string.accuracy) + location.accuracy.toString()
                         val dateFormatted = Date(location.time)
                         val dateToText = simpleDateFormatter.format(dateFormatted)
-                        tv_dateTime.text = getString(string.timeStamp) + dateToText
                         locationDateTime = dateToText.toString()
+                        tv_dateTime.text = getString(string.timeStamp) + dateToText
                         signalSnr = getSignalStrength().toString()
+                        tv_snr.text = getString(string.snr) + signalSnr.toString()
                         tv_downSpeed.text = getString(string.downSpeed) + nc?.linkDownstreamBandwidthKbps.toString() + getString(string.Kbps)
                         tv_upSpeed.text = getString(string.upSpeed) + nc?.linkUpstreamBandwidthKbps.toString() + getString(string.Kbps)
                         cellId = getCellID().toString()
-                        tv_cellID.text = cellId
+                        tv_cellID.text = getString(string.cellId) + cellId
                         createSignalObj()
                     }.launchIn(MainScope())
             }
@@ -193,7 +194,7 @@ class MainActivity : AppCompatActivity() {
                 locationBackgroundJob?.cancel()
                 stopListeners()
                 startButton.text = getString(string.start)
-                startButton.setBackgroundColor(resources.getColor(purple_200))
+                startButton.setBackgroundColor(resources.getColor(purple_700))
             }
         }
         editIntervalButton.setOnClickListener {

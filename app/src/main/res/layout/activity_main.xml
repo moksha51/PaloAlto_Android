@@ -15,7 +15,44 @@
         app:layout_constraintHorizontal_weight="1"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toLeftOf="@id/textView_Longitude"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/textView_UEID" />
+
+    <TextView
+        android:id="@+id/textView_SNR"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:padding="15dp"
+        android:text="@string/snr"
+        app:layout_constraintBottom_toTopOf="@id/textView_upSpeed"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/textView_Accuracy"
+        app:layout_constraintTop_toBottomOf="@id/textView_Latitude" />
+
+    <TextView
+        android:id="@+id/textView_Accuracy"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="100dp"
+        android:padding="15dp"
+        android:text="@string/accuracy"
+        app:layout_constraintBottom_toTopOf="@id/textView_downSpeed"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintLeft_toRightOf="@id/textView_SNR"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textView_CELLID" />
+
+    <TextView
+        android:id="@+id/textView_Altitude"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="15dp"
+        android:text="@string/altitude"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textView_Latitude" />
 
     <TextView
         android:id="@+id/textView_Longitude"
@@ -25,30 +62,8 @@
         android:text="@string/longitude"
         app:layout_constraintHorizontal_weight="1"
         app:layout_constraintLeft_toRightOf="@id/textView_Latitude"
-        app:layout_constraintRight_toLeftOf="@id/textView_Altitude"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/textView_Altitude"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="15dp"
-        android:text="@string/altitude"
-        app:layout_constraintHorizontal_weight="1"
-        app:layout_constraintLeft_toRightOf="@id/textView_Longitude"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/textView_SNR"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="15dp"
-        android:text="@string/snr"
-        app:layout_constraintHorizontal_weight="1"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@id/textView_UEID"
-        app:layout_constraintTop_toBottomOf="@id/textView_Latitude" />
+        app:layout_constraintTop_toBottomOf="@+id/textView_CELLID" />
 
     <TextView
         android:id="@+id/textView_UEID"
@@ -56,10 +71,12 @@
         android:layout_height="wrap_content"
         android:padding="15dp"
         android:text="@string/ueId"
+        app:layout_constraintBottom_toTopOf="@id/textView_Latitude"
         app:layout_constraintHorizontal_weight="1"
-        app:layout_constraintLeft_toRightOf="@id/textView_SNR"
-        app:layout_constraintRight_toLeftOf="@+id/textView_CELLID"
-        app:layout_constraintTop_toBottomOf="@id/textView_Longitude" />
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/textView_CELLID"
+        app:layout_constraintTop_toTopOf="parent" />
+
 
     <TextView
         android:id="@+id/textView_CELLID"
@@ -67,21 +84,11 @@
         android:layout_height="wrap_content"
         android:padding="15dp"
         android:text="@string/cellId"
+        app:layout_constraintBottom_toTopOf="@id/textView_Longitude"
         app:layout_constraintHorizontal_weight="1"
         app:layout_constraintLeft_toRightOf="@id/textView_UEID"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textView_Altitude" />
-
-    <TextView
-        android:id="@+id/textView_Accuracy"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="15dp"
-        android:text="@string/accuracy"
-        app:layout_constraintHorizontal_weight="1"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@id/textView_timeStamp"
-        app:layout_constraintTop_toBottomOf="@id/textView_SNR" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/textView_timeStamp"
@@ -89,11 +96,12 @@
         android:layout_height="wrap_content"
         android:padding="15dp"
         android:text="@string/timeStamp"
+        app:layout_constraintBottom_toTopOf="@id/textView_interval"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintHorizontal_weight="1"
-        app:layout_constraintLeft_toRightOf="@id/textView_Accuracy"
+        app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toLeftOf="@id/textView_timer"
-        app:layout_constraintTop_toBottomOf="@id/textView_UEID" />
-
+        app:layout_constraintTop_toBottomOf="@id/textView_upSpeed" />
 
     <TextView
         android:id="@+id/textView_timer"
@@ -104,7 +112,7 @@
         app:layout_constraintHorizontal_weight="1"
         app:layout_constraintLeft_toRightOf="@id/textView_timeStamp"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textView_CELLID" />
+        app:layout_constraintTop_toBottomOf="@id/textView_downSpeed" />
 
     <TextView
         android:id="@+id/textView_downSpeed"
@@ -112,9 +120,10 @@
         android:layout_height="wrap_content"
         android:padding="15dp"
         android:text="@string/downSpeed"
+        app:layout_constraintBottom_toTopOf="@id/textView_timer"
         app:layout_constraintHorizontal_weight="1"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@id/textView_upSpeed"
+        app:layout_constraintLeft_toRightOf="@id/textView_upSpeed"
+        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/textView_Accuracy" />
 
     <TextView
@@ -123,21 +132,23 @@
         android:layout_height="wrap_content"
         android:padding="15dp"
         android:text="@string/upSpeed"
+        app:layout_constraintBottom_toTopOf="@id/textView_timeStamp"
+        app:layout_constraintHorizontal_bias="0.067"
         app:layout_constraintHorizontal_weight="1"
-        app:layout_constraintLeft_toRightOf="@id/textView_downSpeed"
-        app:layout_constraintRight_toLeftOf="@id/textView_interval"
-        app:layout_constraintTop_toBottomOf="@id/textView_timeStamp" />
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/textView_downSpeed"
+        app:layout_constraintTop_toBottomOf="@id/textView_SNR" />
 
     <TextView
         android:id="@+id/textView_interval"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="15dp"
-        android:text="Interval:"
+        android:text="@string/Interval"
         app:layout_constraintHorizontal_weight="1"
-        app:layout_constraintLeft_toRightOf="@id/textView_upSpeed"
+        app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textView_timer" />
+        app:layout_constraintTop_toBottomOf="@id/textView_timeStamp" />
 
     <EditText
         android:id="@+id/editText_interval"
@@ -147,50 +158,51 @@
         android:text=""
         android:visibility="invisible"
         app:layout_constraintHorizontal_weight="1"
-        app:layout_constraintLeft_toRightOf="@id/textView_upSpeed"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textView_timer" />
+        app:layout_constraintTop_toBottomOf="@id/textView_timer"
+        app:layout_constraintLeft_toRightOf="@id/textView_interval"/>
 
     <Button
         android:id="@+id/button_Start"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="80dp"
         android:text="@string/start"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textView_timeStamp" />
+        app:layout_constraintBottom_toTopOf="@id/button_Stop"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button_EditInterval" />
 
     <Button
         android:id="@+id/button_Stop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="80dp"
+        android:layout_marginBottom="20dp"
         android:text="@string/stop"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/button_Start" />
 
     <Button
         android:id="@+id/button_EditInterval"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="80dp"
         android:text="Edit Interval "
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/button_Stop" />
+        android:hint="@string/Interval"
+        app:layout_constraintBottom_toTopOf="@id/button_Start"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/editText_interval"/>
 
     <Button
         android:id="@+id/button_SaveInterval"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="80dp"
         android:text="@string/save"
         android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/button_Stop" />
+        app:layout_constraintBottom_toTopOf="@id/button_Start"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/editText_interval" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 
