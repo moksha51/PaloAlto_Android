@@ -136,18 +136,18 @@ class MainActivity : AppCompatActivity() {
         NukeSSLCerts.nuke()
         getSignalStrength()
 
+        tv_timer.text = getString(string.timer)
+        tv_ueID.text = getString(string.ueId) + getUniqueDeviceID()
+        settingDeviceId = getUniqueDeviceID()
+
         downSpeed = nc?.linkDownstreamBandwidthKbps.toString()
         upSpeed = nc?.linkUpstreamBandwidthKbps.toString()
 
 
         startButton.setOnClickListener {
             startTimer()
-            tv_timer.text = getString(string.timer)
-            tv_ueID.text = getString(string.ueId) + getUniqueDeviceID()
-            settingDeviceId = getUniqueDeviceID()
-
             tv_cellID.text = getString(string.cellId) + getCellID().toString()
-            tv_snr.text = getString(string.snr) + getSignalStrength().toString()
+            tv_snr.text = getString(string.snr) + getSignalStrength().toString() + " " + sigType.toString()
             tv_upSpeed.text = upSpeed + getString(string.Kbps)
             tv_downSpeed.text = downSpeed + getString(string.Kbps)
             interval = sharedPreferences.getLong("interval", interval)
@@ -173,7 +173,7 @@ class MainActivity : AppCompatActivity() {
                         locationDateTime = dateToText.toString()
                         tv_dateTime.text = getString(string.timeStamp) + dateToText
                         signalSnr = getSignalStrength().toString()
-                        tv_snr.text = getString(string.snr) + signalSnr.toString()
+                        tv_snr.text = getString(string.snr) + getSignalStrength().toString() + " " + sigType.toString()
                         tv_downSpeed.text = getString(string.downSpeed) + nc?.linkDownstreamBandwidthKbps.toString() + getString(string.Kbps)
                         tv_upSpeed.text = getString(string.upSpeed) + nc?.linkUpstreamBandwidthKbps.toString() + getString(string.Kbps)
                         cellId = getCellID().toString()
@@ -213,7 +213,7 @@ class MainActivity : AppCompatActivity() {
             if (interval != null) {
                 editor.putLong("interval", interval)
                 editor.apply()
-                Toast.makeText(this, "New interval duation is: $interval", Toast.LENGTH_SHORT)
+                Toast.makeText(this, "New interval duration is: $interval", Toast.LENGTH_SHORT)
                     .show()
                 tv_interval.text =
                     getString(string.Interval) + interval.toString() + getString(string.ms)
@@ -268,7 +268,6 @@ class MainActivity : AppCompatActivity() {
             downSpeed
         )
         createSignalVolley(signal, interval)
-        Toast.makeText(this, locationDateTime.toString(), Toast.LENGTH_SHORT).show()
     }
 
 //--------------------------- Start of Signal Strength Retrieval
@@ -276,6 +275,7 @@ class MainActivity : AppCompatActivity() {
     var sigStrTelCallback: TelephonyCallback? = null
     var sigStrPSLCallback: PhoneStateListener? = null
     var sigStr: Int? = null
+    var sigType: String? = null
 
     private fun getSignalStrength(): Int? {
         stopListeners()
@@ -321,10 +321,11 @@ class MainActivity : AppCompatActivity() {
     fun processSignalStrengthData(signalStrength: SignalStrength) {
         var listSig: List<CellSignalStrength> = signalStrength.cellSignalStrengths
         for (sig in listSig) {
+            sigStr = sig.dbm
             if (sig is CellSignalStrengthNr) {
-                sigStr = sig.dbm
+                sigType = "5G"
             } else {
-                sigStr = sig.dbm
+                sigType = "Not 5G"
             }
         }
     }
@@ -349,8 +350,7 @@ class MainActivity : AppCompatActivity() {
 
 //--------------------------- Start of Device ID Retrieval
     fun getUniqueDeviceID(): String? {
-        val text = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
-        return text
+        return Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
     }
 
     fun getCellID(): String? {
@@ -374,10 +374,10 @@ class MainActivity : AppCompatActivity() {
 
             val jsonObjectRequest =
                 JsonObjectRequest(Request.Method.POST, postUrl, json, { response ->
-                    val str = response.toString()
-                    Toast.makeText(this@MainActivity, str, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity, "Post Successful", Toast.LENGTH_SHORT).show()
                 }, { error ->
                     Log.d("TAG", "response: ${error.message}")
+                    Toast.makeText(this@MainActivity, "Post Failed, reason: ${error.message}" , Toast.LENGTH_SHORT).show()
                 })
             VolleySingleton.getInstance(this@MainActivity).addToRequestQueue(jsonObjectRequest)
         }, interval)
@@ -415,7 +415,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateStopWatchView(timeInSeconds: Long) {
         val formattedTime = getFormattedStopWatch((timeInSeconds * 1000))
-        tv_timer.text = formattedTime
+        tv_timer.text = getString(string.timer) + formattedTime
     }
 
     private fun getFormattedStopWatch(ms: Long): String {

@@ -10,9 +10,9 @@
     <string name="Interval">Interval: </string>
 
 
-    <string name="longitude"> Longitude: </string>
-    <string name="latitude"> Latitude: </string>
-    <string name="altitude"> Altitude: </string>
+    <string name="longitude"> Long: </string>
+    <string name="latitude"> Lat: </string>
+    <string name="altitude"> Alt: </string>
     <string name="accuracy"> Accuracy: </string>
     <string name="snr"> SNR: </string>
     <string name="ueId"> UEID: </string>
