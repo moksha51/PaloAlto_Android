@@ -129,7 +129,7 @@ class MainActivity : AppCompatActivity() {
         tv_interval = findViewById(id.textView_interval)
         tv_timer = findViewById(id.textView_timer)
         tv_interval.text =
-            getString(string.Interval) + sharedPreferences.getLong("interval", interval!!)
+            getString(string.Interval) + sharedPreferences.getLong("interval", interval)
                 .toString() + getString(string.ms)
         et_interval = findViewById(id.editText_interval)
 
